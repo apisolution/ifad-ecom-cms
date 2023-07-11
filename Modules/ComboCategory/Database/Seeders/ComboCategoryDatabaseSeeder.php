@@ -21,14 +21,14 @@ class ComboCategoryDatabaseSeeder extends Seeder
             [
                 'id'=> '1',
                 'name'=> 'Chips',
-                'slug'=> 'chips',
+                'image'=> 'chips.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id'=> '2',
                 'name'=> 'Biscuits',
-                'slug'=> 'biscuits',
+                'image'=> 'biscuits.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

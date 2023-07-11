@@ -19,7 +19,6 @@ class OrderDatabaseSeeder extends Seeder
         Model::unguard();
 
         Order::create([
-            'order_type' => 'product',
             'order_date' => now(),
             'customer_id' => '1',
             'shipping_address' => 'House 04, Flat, 7A Road 23/A, Dhaka 1213',
@@ -39,6 +38,7 @@ class OrderDatabaseSeeder extends Seeder
 
         OrderItem::insert([
             [
+                'type' => 'product',
                 'order_id' => '1',
                 'inventory_id' => '1',
                 'quantity' => '100',
@@ -53,7 +53,6 @@ class OrderDatabaseSeeder extends Seeder
 
         Order::create([
             'order_date' => now(),
-            'order_type' => 'combo',
             'customer_id' => '1',
             'shipping_address' => 'House 04, Flat, 7A Road 23/A, Dhaka 1213',
             'billing_address' => 'House 04, Flat, 7A Road 23/A, Dhaka 1213',
@@ -72,6 +71,7 @@ class OrderDatabaseSeeder extends Seeder
 
         OrderItem::insert([
             [
+                'type' => 'combo',
                 'order_id' => '2',
                 'combo_id' => '1',
                 'quantity' => '100',

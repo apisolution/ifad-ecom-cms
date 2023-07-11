@@ -16,7 +16,6 @@ class CreateOrdersTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->date('order_date')->nullable();
-            $table->string('order_type')->nullable();
             $table->foreignId('customer_id')->nullable()->constrained('customers', 'id');
             $table->text('shipping_address')->nullable();
             $table->text('billing_address')->nullable();

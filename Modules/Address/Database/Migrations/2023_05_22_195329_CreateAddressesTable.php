@@ -18,12 +18,19 @@ class CreateAddressesTable extends Migration
             $table->string('title')->nullable();
             $table->string('address_line_1')->nullable();
             $table->string('address_line_2')->nullable();
-            $table->foreignId('division_id')->nullable()->nullable()->constrained('divisions', 'id');
-            $table->foreignId('district_id')->nullable()->nullable()->constrained('districts', 'id');
-            $table->foreignId('upozila_id')->nullable()->nullable()->constrained('upozilas', 'id');
+            $table->integer('division_id')->nullable();
+            $table->integer('district_id')->nullable();
+            $table->integer('upazila_id')->nullable();
             $table->string('postcode')->nullable();
             $table->string('phone')->nullable();
             $table->foreignId('customer_id')->nullable()->constrained('customers', 'id')->cascadeOnDelete();
+            $table->tinyInteger('is_default_billing')->nullable();
+            $table->tinyInteger('is_default_shipping')->nullable();
+            $table->enum('status', ['1', '2'])->nullable()->default('1')->comment("1=Active, 2=Inactive");
+
+            $table->foreign('division_id')->references('id')->on('divisions');
+            $table->foreign('district_id')->references('id')->on('districts');
+            $table->foreign('upazila_id')->references('id')->on('upazilas');
             $table->timestamps();
         });
     }

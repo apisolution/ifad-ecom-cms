@@ -2,8 +2,8 @@
 
 namespace Modules\Address\Providers;
 
-use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Factory;
 
 class AddressServiceProvider extends ServiceProvider
 {

@@ -19,9 +19,4 @@ class ComboCategory extends Model
     {
         return $this->hasMany(Combo::class, 'combo_category_id', 'id');
     }
-
-    protected static function newFactory()
-    {
-        return \Modules\ComboCategory\Database\factories\ComboCategoryFactory::new();
-    }
 }

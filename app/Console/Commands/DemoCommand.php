@@ -13,7 +13,7 @@ class DemoCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'demo:db';
+    protected $signature = 'db:demo';
 
     /**
      * The console command description.
@@ -67,6 +67,9 @@ class DemoCommand extends Command
 
         Artisan::call('module:migrate-refresh Wishlist');
         Artisan::call('module:seed Wishlist');
+
+        Artisan::call('module:migrate-refresh Address');
+        Artisan::call('module:seed Address');
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 

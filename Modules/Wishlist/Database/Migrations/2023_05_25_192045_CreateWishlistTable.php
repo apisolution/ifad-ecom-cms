@@ -17,6 +17,7 @@ class CreateWishlistTable extends Migration
             $table->id();
             $table->foreignId('customer_id')->nullable()->constrained('customers', 'id')->cascadeOnDelete();
             $table->foreignId('inventory_id')->nullable()->constrained('inventories', 'id')->cascadeOnDelete();
+            $table->foreignId('combo_id')->nullable()->constrained('combos', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
     }
