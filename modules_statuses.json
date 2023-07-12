@@ -42,5 +42,6 @@
     "PaymentMethod": true,
     "ComboCategory": true,
     "ComboImage": true,
-    "InventoryImage": true
+    "InventoryImage": true,
+    "Review": true
 }

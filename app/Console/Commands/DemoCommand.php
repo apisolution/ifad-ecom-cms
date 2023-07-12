@@ -71,6 +71,9 @@ class DemoCommand extends Command
         Artisan::call('module:migrate-refresh Address');
         Artisan::call('module:seed Address');
 
+        Artisan::call('module:migrate-refresh Review');
+        Artisan::call('module:seed Review');
+
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         echo "Migration & Seed Completed.";

@@ -1,7 +1,7 @@
 
 API Listing IFAD
 *******************************************************
-- How TO Buy 
+- How TO Buy
 - B2B Business Form
 
 - Login -- Done
@@ -38,13 +38,18 @@ API Listing IFAD
 - Privacy Policy (AZAD)
 - Delivery (AZAD)
 
-- Contact Page: 
+- Contact Page:
    -- Contact Data (AZAD)
    -- Contact Form to EMAIL use ENV variable
       {{BASE_URL}}/send-contact-form
 
 - Single Product
-  -- Product Review 
+  -- Product Review
+     {{BASE_URL}}/reviews
+
+  -- Related Product
+     {{BASE_URL}}/inventories/categories/4?order_column=id&order_by=ASC&limit=20
+
   -- Wishlist
      {{BASE_URL}}/wishlist
 
@@ -75,5 +80,5 @@ MY Account
    -- Address
       {{BASE_URL}}/addresses/1/default-shipping
       {{BASE_URL}}/addresses/1/default-billing
-      
+
 
