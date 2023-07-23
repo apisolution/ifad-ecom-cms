@@ -312,51 +312,55 @@
             $(document).on('click', '.edit_data', function () {
                 $('#content').html('');
                 rowCounter=0;
+
                 let id = $(this).data('id');
+
                 $('#store_or_update_form')[0].reset();
                 $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
                 $('#store_or_update_form').find('.error').remove();
+
                 if (id) {
                     $.ajax({
-                        url: "{{route('inventory.edit')}}",
+                        url: "{{ route('inventory.edit') }}",
                         type: "POST",
-                        data: { id: id,_token: _token},
+                        data: { id: id, _token: _token},
                         dataType: "JSON",
                         success: function (data) {
-                            console.log(data)
+                            console.log(data);
+                            // return false;
 
                             data.inventory_variants.map(function (val, key) {
                                 const rowId = `row-${rowCounter}`;
 
-                                var all_variant ='';
-                                data.variants.map(function(vari,ke){
-
-                                    if(vari.id==val.variant_id) {
-                                        all_variant+= "<option value="+vari.id+" <?php echo 'selected'; ?>>"+vari.name+"</option>";
+                                var variantHtml ='';
+                                data.variants.map(function(variant, ke){
+                                    if(variant.id == val.variant_id) {
+                                        variantHtml += "<option value='" + variant.id + "' selected>" + variant.name + "</option>";
                                     }else{
-                                        all_variant+= "<option  value="+vari.id+">"+vari.name+"</option>";
+                                        variantHtml += "<option  value=" + variant.id + ">" + variant.name + "</option>";
                                     }
                                 });
 
-                                var all_opt ='';
-                                data.all_variant_options.map(function(va,ke){
-                                    if(va.variant_id==val.variant_id) {
-                                        if(va.id==val.variant_option_id) {
-                                            all_opt+= "<option value="+va.id+" <?php echo 'selected'; ?>>"+va.name+"</option>";
+                                var variantOptionHtml ='';
+                                data.all_variant_options.map(function(variant_option, ke){
+                                    if(variant_option.variant_id == val.variant_id) {
+                                        if(variant_option.id == val.variant_option_id) {
+                                            variantOptionHtml += "<option value='" + variant_option.id + "' selected='selected'>" + variant_option.name + "</option>";
                                         }else{
-                                            all_opt+= "<option  value="+va.id+">"+va.name+"</option>";
+                                            variantOptionHtml += "<option  value=" + variant_option.id + ">" + variant_option.name + "</option>";
                                         }
-
                                     }
                                 });
 
                                 if (rowCounter == 0) {
                                     // Handle the first row differently
                                     $('.main-0').val(val.variant_id);
-                                    $('.row-0').html(all_opt);
-                                    $('.' + rowId).val(val.variant_option_id);
-                                    rowCounter++;
+                                    $('.row-0').html(variantOptionHtml);
+                                    $('.row-0').val(val.variant_option_id);
 
+                                    // $('.' + rowId).val(val.variant_option_id);
+
+                                    rowCounter++;
                                 } else {
                                     // Create new row with variant and variant_option selects
                                     const div = document.createElement('div');
@@ -364,14 +368,14 @@
 
                                     div.innerHTML = `<div class="form-group col-md-3 required">
                                   <label for="variant_id[]">Variants</label>
-                                  <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
-                                       ${all_variant}
+                                  <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value, 'row-${rowCounter}')" >
+                                       ${variantHtml}
                                     </select>
                                   </div>
                                   <div class="form-group col-md-3 variant_option_id">
                                     <label for="variant_option_id">Variant Option</label>
                                     <select name="variant_option_id[]" id="variant_option_id" class="form-control row-${rowCounter}">
-                                        ${all_opt}
+                                        ${variantOptionHtml}
                                     </select>
                                   </div>
                                   <div class="form-group col-md-6">
@@ -382,8 +386,10 @@
                                     document.getElementById('content').appendChild(div);
 
                                     // Set the values for the selects in the new row
-                                    $('.main-' + rowCounter).val(`${val.variant_id}`);
-                                    $('.row-' + rowCounter).val(`${val.variant_option_id}`);
+                                    //$('.main-' + rowCounter).val(`${val.variant_id}`);
+                                    //console.log(rowCounter);
+                                    //$('.row-' + rowCounter).val(val.variant_option_id);
+                                    // $('.' + rowId).val(val.variant_option_id);
 
                                     rowCounter++;
                                 }
@@ -403,7 +409,7 @@
                             $('#store_or_update_form #reorder_quantity').val(data.reorder_quantity);
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
                             $('#store_or_update_form #variant').val(data.variant);
-                            $('#store_or_update_form #variant_option_id').val(data.variant_option_id);
+                            //$('#store_or_update_form #variant_option_id').val(data.variant_option_id);
 
                             const is_special_deal = document.getElementById('is_special_deal');
                             const is_manage_stock = document.getElementById('is_manage_stock');

@@ -93,7 +93,7 @@ class InventoryController extends BaseController
     public function store_or_update_data(InventoryFormRequest $request)
     {
         if ($request->ajax()) {
-
+            //return $request->all();
             if (permission('inventory-add') || permission('inventory-edit')) {
                 $collection = collect($request->validated())->except(['fileUpload', 'product_id']);
                 $collection = $this->track_data($request->update_id, $collection);
