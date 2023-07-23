@@ -4,16 +4,16 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Module ComboCategory</title>
+        <title>Module ContentCategory</title>
 
        {{-- Laravel Mix - CSS File --}}
-       {{-- <link rel="stylesheet" href="{{ mix('css/combocategory.css') }}"> --}}
+       {{-- <link rel="stylesheet" href="{{ mix('css/contentcategory.css') }}"> --}}
 
     </head>
     <body>
         @yield('content')
 
         {{-- Laravel Mix - JS File --}}
-        {{-- <script src="{{ mix('js/combocategory.js') }}"></script> --}}
+        {{-- <script src="{{ mix('js/contentcategory.js') }}"></script> --}}
     </body>
 </html>

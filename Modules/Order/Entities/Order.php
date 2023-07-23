@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Customer\Entities\Customer;
 use Modules\PaymentMethod\Entities\PaymentMethod;
+use Modules\Base\Entities\BaseModel;
 
-class Order extends Model
+class Order extends BaseModel
 {
     use HasFactory;
 
@@ -26,11 +27,65 @@ class Order extends Model
     const PAYMENT_STATUS_PAID = 1;
     const PAYMENT_STATUS_UNPAID = 2;
 
-    protected $fillable = [];
+    protected $table = 'orders';
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
+    protected $fillable = ['order_date', 'customer_id', 'shipping_address', 'billing_address',
+        'total', 'discount', 'shipping_charge','tax','grand_total','payment_method_id',
+        'payment_details','payment_status_id','order_status_id','created_at','updated_at'];
+
+    protected $name;
+
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    private function get_datatable_query()
+    {
+        if(permission('order-bulk-delete')){
+            $this->column_order = [null,'id','order_date', 'shipping_address', 'total',null];
+        }else{
+            $this->column_order = ['id','order_date', 'shipping_address', 'total',null];
+        }
+
+        $query = self::toBase();
+
+        /*****************
+         * *Search Data **
+         ******************/
+
+        if (!empty($this->name)) {
+            $query->where('shipping_address', 'like', '%' . $this->name . '%');
+        }
+
+        if (isset($this->orderValue) && isset($this->dirValue)) {
+            $query->orderBy($this->column_order[$this->orderValue], $this->dirValue);
+        } else if (isset($this->order)) {
+            $query->orderBy(key($this->order), $this->order[key($this->order)]);
+        }
+        return $query;
+    }
+
+    public function getDatatableList()
+    {
+        $query = $this->get_datatable_query();
+        if ($this->lengthVlaue != -1) {
+            $query->offset($this->startVlaue)->limit($this->lengthVlaue);
+        }
+        return $query->get();
+    }
+
+    public function count_filtered()
+    {
+        $query = $this->get_datatable_query();
+        return $query->get()->count();
+    }
+
+    public function count_all()
+    {
+        return self::toBase()->get()->count();
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');

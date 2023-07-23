@@ -4,48 +4,77 @@ namespace Modules\Inventory\Entities;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Combo\Entities\ComboItem;
-use Modules\InventoryImage\Entities\InventoryImage;
-use Modules\Order\Entities\OrderItem;
-use Modules\Product\Entities\Product;
+use Modules\Base\Entities\BaseModel;
 
-class Inventory extends Model
+
+class Inventory extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $table = 'inventories';
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function product()
+    protected $fillable = ['product_id','title','sku','sale_price','offer_price',
+        'offer_start','offer_end','stock_quantity','reorder_quantity','is_special_deal',
+        'is_manage_stock','min_order_quantity','status','created_at','updated_at'];
+
+    protected $name;
+
+    public function setName($name)
     {
-        return $this->belongsTo(Product::class, 'product_id', 'id')
-            ->with('category', 'subCategory', 'variant', 'variantOption', 'segment', 'pack');
+        $this->name = $name;
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function orderItems()
+    private function get_datatable_query()
     {
-        return $this->belongsTo(OrderItem::class, 'inventory_id', 'id');
+        if(permission('ccategory-bulk-delete')){
+            $this->column_order = [null,'title','sale_price','stock_quantity','status',null];
+        }else{
+            $this->column_order = ['title','sale_price','stock_quantity','status',null];
+        }
+
+        $query = self::toBase();
+
+        /*****************
+         * *Search Data **
+         ******************/
+        if (!empty($this->name)) {
+            $query->where('title', 'like', '%' . $this->name . '%');
+        }
+
+        if (isset($this->orderValue) && isset($this->dirValue)) {
+            $query->orderBy($this->column_order[$this->orderValue], $this->dirValue);
+        } else if (isset($this->order)) {
+            $query->orderBy(key($this->order), $this->order[key($this->order)]);
+        }
+        return $query;
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function comboItems()
+    public function getDatatableList()
     {
-        return $this->belongsTo(ComboItem::class, 'inventory_id', 'id');
+        $query = $this->get_datatable_query();
+        if ($this->lengthVlaue != -1) {
+            $query->offset($this->startVlaue)->limit($this->lengthVlaue);
+        }
+        return $query->get();
+    }
+
+    public function count_filtered()
+    {
+        $query = $this->get_datatable_query();
+        return $query->get()->count();
+    }
+
+    public function count_all()
+    {
+        return self::toBase()->get()->count();
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function inventoryVariants()
+    public function combos()
     {
-        return $this->hasMany(InventoryVariant::class, 'inventory_id', 'id')->with('variant', 'variantOption');
+        return $this->hasMany(Combo::class, 'combo_category_id', 'id');
     }
 
     /**
@@ -55,9 +84,7 @@ class Inventory extends Model
     {
         return $this->hasMany(InventoryImage::class, 'inventory_id', 'id');
     }
-
-    protected static function newFactory()
-    {
-        return \Modules\Inventory\Database\factories\InventoryFactory::new();
+    public function inventoryVariants(){
+        return $this->hasMany(InventoryVariant::class,'inventory_id','id');
     }
 }

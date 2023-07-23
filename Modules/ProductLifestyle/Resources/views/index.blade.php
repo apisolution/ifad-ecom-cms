@@ -317,7 +317,7 @@ $(document).ready(function(){
                 data: { id: id,_token: _token},
                 dataType: "JSON",
                 success: function (data) {
-
+                    console.log(data)
                     $('#store_or_update_form #update_id').val(data.id);
                     $('#store_or_update_form #product_id').val(data.product_id);
                     $('#store_or_update_form #old_image').val(data.lifestyle_image);

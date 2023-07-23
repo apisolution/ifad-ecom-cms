@@ -11,6 +11,15 @@
 |
 */
 
-Route::prefix('combo')->group(function() {
-    Route::get('/', 'ComboController@index');
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('combo', 'ComboController@index')->name('combo');
+    Route::group(['prefix' => 'combo', 'as'=>'combo.'], function () {
+        Route::post('datatable-data', 'ComboController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'ComboController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'ComboController@edit')->name('edit');
+        Route::post('delete', 'ComboController@delete')->name('delete');
+        Route::post('bulk-delete', 'ComboController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'ComboController@change_status')->name('change.status');
+    });
 });

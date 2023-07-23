@@ -43,5 +43,6 @@
     "ComboCategory": true,
     "ComboImage": true,
     "InventoryImage": true,
-    "Review": true
+    "Review": true,
+    "Customers": true
 }

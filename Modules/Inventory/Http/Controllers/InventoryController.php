@@ -2,78 +2,210 @@
 
 namespace Modules\Inventory\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
+use App\Traits\UploadAble;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Modules\Base\Http\Controllers\BaseController;
+use Modules\Inventory\Entities\InventoryVariant;
+use Modules\Product\Entities\Product;
+use Modules\Inventory\Entities\Inventory;
+use Modules\Inventory\Http\Requests\InventoryFormRequest;
+use App\Models\InventoryImage;
+use DB;
+use Modules\VariantOption\Entities\VariantOption;
 
-class InventoryController extends Controller
+class InventoryController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
+    use UploadAble;
+
+    public function __construct(Inventory $model)
+    {
+        $this->model = $model;
+    }
+
     public function index()
     {
-        return view('inventory::index');
+        // dd($this->model->getDatatableList());
+        if (permission('inventory-access')) {
+            $this->setPageData('Inventory Product', 'Inventory Product', 'fas fa-box');
+            $data = [
+                'products' => Product::all(),
+                'variants' => DB::select('select * from variants'),
+                 'variant_options' => DB::select('select * from variant_options')
+            ];
+            return view('inventory::index', $data);
+        } else {
+            return $this->unauthorized_access_blocked();
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
+    public function get_datatable_data(Request $request)
     {
-        return view('inventory::create');
+        if (permission('inventory-access')) {
+            if ($request->ajax()) {
+                if (!empty($request->name)) {
+                    $this->model->setName($request->name);
+                }
+                if (!empty($request->product_id)) {
+                    $this->model->setProduct($request->product_id);
+                }
+
+                $this->set_datatable_default_property($request);
+                $list = $this->model->getDatatableList();
+
+                $data = [];
+                $no = $request->input('start');
+                foreach ($list as $value) {
+
+                    $no++;
+                    $action = '';
+
+                    if (permission('inventory-edit')) {
+                        $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '"><i class="fas fa-edit text-primary"></i> Edit</a>';
+                    }
+                    if (permission('inventory-delete')) {
+                        $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->title . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
+                    }
+
+                    $row = [];
+                    if (permission('inventory-bulk-delete')) {
+                        $row[] = table_checkbox($value->id);
+                    }
+                    $row[] = $no;
+                    $row[] = $value->title;
+                    $row[] = $value->sale_price;
+                    $row[] = $value->stock_quantity;
+                    $row[] = permission('inventory-edit') ? change_status($value->id, $value->status, $value->title) : STATUS_LABEL[$value->status];
+
+                    $row[] = action_button($action);
+                    $data[] = $row;
+                }
+                return $this->datatable_draw($request->input('draw'), $this->model->count_all(),
+                    $this->model->count_filtered(), $data);
+            } else {
+                $output = $this->access_blocked();
+            }
+
+            return response()->json($output);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
+    public function store_or_update_data(InventoryFormRequest $request)
     {
-        //
+        if ($request->ajax()) {
+            if (permission('inventory-add') || permission('inventory-edit')) {
+                $collection = collect($request->validated())->except(['fileUpload', 'product_id']);
+                $collection = $this->track_data($request->update_id, $collection);
+                $product_id = $request->product_id;
+                $collection = $collection->merge(compact('product_id'));
+                $result = $this->model->updateOrCreate(['id' => $request->update_id], $collection->all());
+                //$output = $this->store_message($result, $request->update_id);
+
+                //inventory variant option save start
+                $inventory['inventory_id'] = $result->id??0;
+                $inventory_variant_option = collect($inventory);
+                $inventory_variant_ids = $request->variant_id;
+                $variant_option_ids = $request->variant_option_id;
+
+                for($i=0;$i<count($request->variant_id); $i++){
+                    InventoryVariant::updateOrCreate(['inventory_id' => $request->update_id], [
+                        'inventory_id'=>$result->id??0,
+                        'variant_id'=>$inventory_variant_ids[$i],
+                        'variant_option_id'=>$variant_option_ids[$i],
+                    ]);
+                }
+
+              $output = $this->store_message($result, $request->update_id);
+              return response()->json($output);
+
+            } else {
+                $output = $this->access_blocked();
+                return response()->json($output);
+            }
+
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
+
+    public function edit(Request $request)
     {
-        return view('inventory::show');
+        if ($request->ajax()) {
+            if (permission('inventory-edit')) {
+                $data = $this->model->findOrFail($request->id);
+                $data->load('inventoryVariants');
+                $data['all_variant_options'] = VariantOption::get();
+                $output = $this->data_message($data);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
+    public function delete(Request $request)
     {
-        return view('inventory::edit');
+        if ($request->ajax()) {
+            if (permission('inventory-delete')) {
+                $pimage = $this->model->find($request->id);
+                $image = $pimage->image;
+                $result = $pimage->delete();
+                if ($result) {
+                    if (!empty($image)) {
+                        $this->delete_file($image, PRODUCT_MULTI_IMAGE_PATH);
+                    }
+                }
+                $output = $this->delete_message($result);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
+    public function bulk_delete(Request $request)
     {
-        //
+        if ($request->ajax()) {
+            if (permission('inventory-bulk-delete')) {
+                $pimages = $this->model->toBase()->select('image')->whereIn('id', $request->ids)->get();
+                $result = $this->model->destroy($request->ids);
+                if ($result) {
+                    if (!empty($pimages)) {
+                        foreach ($pimages as $pimage) {
+                            if ($pimage->image) {
+                                $this->delete_file($pimage->image, PRODUCT_MULTI_IMAGE_PATH);
+                            }
+                        }
+                    }
+                }
+                $output = $this->bulk_delete_message($result);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
+    public function change_status(Request $request)
     {
-        //
+        if ($request->ajax()) {
+            if (permission('inventory-edit')) {
+                $result = $this->model->find($request->id)->update(['status' => $request->status]);
+                $output = $result ? ['status' => 'success', 'message' => 'Status has been changed successfully']
+                    : ['status' => 'error', 'message' => 'Failed to change status'];
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 }
+

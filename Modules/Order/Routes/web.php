@@ -11,6 +11,14 @@
 |
 */
 
-Route::prefix('order')->group(function() {
-    Route::get('/', 'OrderController@index');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('order', 'OrderController@index')->name('order');
+    Route::group(['prefix' => 'order', 'as'=>'order.'], function () {
+        Route::post('datatable-data', 'OrderController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'OrderController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'OrderController@edit')->name('edit');
+        Route::post('delete', 'OrderController@delete')->name('delete');
+        Route::post('bulk-delete', 'OrderController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'OrderController@change_status')->name('change.status');
+    });
 });

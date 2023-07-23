@@ -4,16 +4,16 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Module Order</title>
+        <title>Module SubCategory</title>
 
        {{-- Laravel Mix - CSS File --}}
-       {{-- <link rel="stylesheet" href="{{ mix('css/order.css') }}"> --}}
+       {{-- <link rel="stylesheet" href="{{ mix('css/subcategory.css') }}"> --}}
 
     </head>
     <body>
         @yield('content')
 
         {{-- Laravel Mix - JS File --}}
-        {{-- <script src="{{ mix('js/order.js') }}"></script> --}}
+        {{-- <script src="{{ mix('js/subcategory.js') }}"></script> --}}
     </body>
 </html>

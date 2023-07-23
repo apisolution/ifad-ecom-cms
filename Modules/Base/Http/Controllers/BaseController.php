@@ -70,6 +70,11 @@ class BaseController extends Controller
         return $update_id ? $collection->merge(compact('updated_by','updated_at'))
         : $collection->merge(compact('created_by','created_at'));
     }
+    protected function track_data_except_created_by($update_id=null,$collection){
+        $created_at = $updated_at = Carbon::now();
+        return $update_id ? $collection->merge(compact('updated_at'))
+        : $collection->merge(compact('created_at'));
+    }
 
     protected function data_message($data)
     {

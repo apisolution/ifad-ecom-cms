@@ -2,78 +2,175 @@
 
 namespace Modules\Order\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
+use App\Traits\UploadAble;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Modules\Base\Http\Controllers\BaseController;
+use Modules\Order\Entities\Order;
+use Modules\Order\Http\Requests\OrderFormRequest;
+use DB;
 
-class OrderController extends Controller
+class OrderController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
+    use UploadAble;
+
+    public function __construct(Order $model)
+    {
+        $this->model = $model;
+    }
+
     public function index()
     {
-        return view('order::index');
+        if (permission('order-access')) {
+            $this->setPageData('Order', 'Order', 'fas fa-box');
+            $data['payment_methods'] = DB::table('payment_methods')->get();
+            return view('order::index',$data);
+        } else {
+            return $this->unauthorized_access_blocked();
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
+    public function get_datatable_data(Request $request)
     {
-        return view('order::create');
+        if (permission('order-access')) {
+            if ($request->ajax()) {
+                if (!empty($request->name)) {
+                    $this->model->setName($request->name);
+                }
+
+                $this->set_datatable_default_property($request);
+                $list = $this->model->getDatatableList();
+
+                $data = [];
+                $no = $request->input('start');
+                foreach ($list as $value) {
+
+                    $no++;
+                    $action = '';
+
+                    if (permission('order-edit')) {
+                        $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '"><i class="fas fa-edit text-primary"></i> Edit</a>';
+                    }
+                    if (permission('order-delete')) {
+                        $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->id . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
+                    }
+
+                    $row = [];
+
+                    if (permission('order-bulk-delete')) {
+                        $row[] = table_checkbox($value->id);
+                    }
+                    $row[] = $no;
+                    $row[] = $value->order_date;
+                    $row[] = $value->shipping_address;
+                    $row[] = $value->total;
+                    $row[] = action_button($action);
+                    $data[] = $row;
+                }
+                return $this->datatable_draw($request->input('draw'), $this->model->count_all(),
+                    $this->model->count_filtered(), $data);
+            } else {
+                $output = $this->access_blocked();
+            }
+
+            return response()->json($output);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
+    public function store_or_update_data(OrderFormRequest $request)
     {
-        //
+        if ($request->ajax()) {
+            if (permission('order-add') || permission('order-edit')) {
+                $collection = collect($request->validated());
+                $collection = $this->track_data($request->update_id, $collection);
+
+                $result = $this->model->updateOrCreate(['id' => $request->update_id], $collection->all());
+                $output = $this->store_message($result, $request->update_id);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
+
+    public function edit(Request $request)
     {
-        return view('order::show');
+        if ($request->ajax()) {
+            if (permission('order-edit')) {
+                $data = $this->model->findOrFail($request->id);
+                $output = $this->data_message($data);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
+    public function delete(Request $request)
     {
-        return view('order::edit');
+        if ($request->ajax()) {
+            if (permission('order-delete')) {
+                $scategory = $this->model->find($request->id);
+                $image = $scategory->image;
+                $result = $scategory->delete();
+                if ($result) {
+                    if (!empty($image)) {
+                        $this->delete_file($image, SUB_CATEGORY_IMAGE_PATH);
+                    }
+                }
+                $output = $this->delete_message($result);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
+    public function bulk_delete(Request $request)
     {
-        //
+        if ($request->ajax()) {
+            if (permission('order-bulk-delete')) {
+                $scategorys = $this->model->toBase()->select('image')->whereIn('id', $request->ids)->get();
+                $result = $this->model->destroy($request->ids);
+                if ($result) {
+                    if (!empty($scategorys)) {
+                        foreach ($scategorys as $scategory) {
+                            if ($scategory->image) {
+                                $this->delete_file($scategory->image, SUB_CATEGORY_IMAGE_PATH);
+                            }
+                        }
+                    }
+                }
+                $output = $this->bulk_delete_message($result);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
+    public function change_status(Request $request)
     {
-        //
+        if ($request->ajax()) {
+            if (permission('order-edit')) {
+                $result = $this->model->find($request->id)->update(['status' => $request->status]);
+                $output = $result ? ['status' => 'success', 'message' => 'Status has been changed successfully']
+                    : ['status' => 'error', 'message' => 'Failed to change status'];
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
     }
 }
+

@@ -11,6 +11,14 @@
 |
 */
 
-Route::prefix('paymentmethod')->group(function() {
-    Route::get('/', 'PaymentMethodController@index');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('paymentmethod', 'PaymentMethodController@index')->name('combocategory');
+    Route::group(['prefix' => 'paymentmethod', 'as'=>'paymentmethod.'], function () {
+        Route::post('datatable-data', 'PaymentMethodController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'PaymentMethodController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'PaymentMethodController@edit')->name('edit');
+        Route::post('delete', 'PaymentMethodController@delete')->name('delete');
+        Route::post('bulk-delete', 'PaymentMethodController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'PaymentMethodController@change_status')->name('change.status');
+    });
 });

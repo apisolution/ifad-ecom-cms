@@ -11,6 +11,14 @@
 |
 */
 
-Route::prefix('combocategory')->group(function() {
-    Route::get('/', 'ComboCategoryController@index');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('combocategory', 'ComboCategoryController@index')->name('combocategory');
+    Route::group(['prefix' => 'combocategory', 'as'=>'combocategory.'], function () {
+        Route::post('datatable-data', 'ComboCategoryController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'ComboCategoryController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'ComboCategoryController@edit')->name('edit');
+        Route::post('delete', 'ComboCategoryController@delete')->name('delete');
+        Route::post('bulk-delete', 'ComboCategoryController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'ComboCategoryController@change_status')->name('change.status');
+    });
 });
