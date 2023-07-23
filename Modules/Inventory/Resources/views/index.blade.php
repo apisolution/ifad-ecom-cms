@@ -332,8 +332,9 @@
                             data.inventory_variants.map(function (val, key) {
                                 const rowId = `row-${rowCounter}`;
 
-                                var variantHtml ='';
+                                var variantHtml ="<option value='' >Select please</option>";
                                 data.variants.map(function(variant, ke){
+
                                     if(variant.id == val.variant_id) {
                                         variantHtml += "<option value='" + variant.id + "' selected>" + variant.name + "</option>";
                                     }else{
@@ -341,11 +342,12 @@
                                     }
                                 });
 
-                                var variantOptionHtml ='';
+                                var variantOptionHtml ="<option value='' >Select please</option>";
                                 data.all_variant_options.map(function(variant_option, ke){
                                     if(variant_option.variant_id == val.variant_id) {
+
                                         if(variant_option.id == val.variant_option_id) {
-                                            variantOptionHtml += "<option value='" + variant_option.id + "' selected='selected'>" + variant_option.name + "</option>";
+                                            variantOptionHtml += "<option value='" + variant_option.id + "' selected>" + variant_option.name + "</option>";
                                         }else{
                                             variantOptionHtml += "<option  value=" + variant_option.id + ">" + variant_option.name + "</option>";
                                         }
@@ -402,8 +404,12 @@
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
                             $('#store_or_update_form #sale_price').val(data.sale_price);
                             $('#store_or_update_form #offer_price').val(data.offer_price);
-                            // $('#store_or_update_form #offer_start').val(data.offer_start.substring(0,10));
-                            // $('#store_or_update_form #offer_end').val(data.offer_end.substring(0,10));
+                            if(data.offer_start){
+                                $('#store_or_update_form #offer_start').val(data.offer_start.substring(0,10));
+                            }
+                            if(data.offer_end) {
+                                $('#store_or_update_form #offer_end').val(data.offer_end.substring(0, 10));
+                            }
                             $('#store_or_update_form #sku').val(data.sku);
                             $('#store_or_update_form #stock_quantity').val(data.stock_quantity);
                             $('#store_or_update_form #reorder_quantity').val(data.reorder_quantity);
@@ -419,8 +425,6 @@
                             if(data.is_manage_stock==1){
                                 is_manage_stock.checked= !is_manage_stock.checked;
                             }
-                            $('#store_or_update_form #is_special_deal').val(data.is_special_deal);
-                            $('#store_or_update_form #is_manage_stock').val(data.is_manage_stock);
 
                             // $('#store_or_update_form #old_image').val(data[0].image);
                             $('#store_or_update_form .selectpicker').selectpicker('refresh');
@@ -529,7 +533,7 @@
                 type:"GET",
                 dataType:"JSON",
                 success:function(data){
-                    var opt = '';
+                    var opt = "<option value=''>Please select</option>";
                     const loadedContentDiv = `.${variant_option_id}`;
 
                     // $('#store_or_update_form #variant_option_id').empty();

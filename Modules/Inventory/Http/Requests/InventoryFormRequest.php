@@ -18,6 +18,8 @@ class InventoryFormRequest extends FormRequest
 //        $rules['title'] = ['required','unique:inventories,title,id,'.$this->id];
 //        $rules['sku'] = ['required','unique:inventories,sku,id,'.$this->id];
         $rules['image']  = ['nullable','image','mimes:png,jpg'];
+        $rules['title']  = ['nullable'];
+        $rules['sku']  = ['nullable'];
         $rules['sale_price']  = ['nullable'];
         $rules['offer_price']  = ['nullable'];
         $rules['offer_start']  = ['nullable'];

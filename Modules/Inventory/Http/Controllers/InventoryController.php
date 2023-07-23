@@ -93,7 +93,7 @@ class InventoryController extends BaseController
     public function store_or_update_data(InventoryFormRequest $request)
     {
         if ($request->ajax()) {
-            //return $request->all();
+//            return $request->all();
             if (permission('inventory-add') || permission('inventory-edit')) {
                 $collection = collect($request->validated())->except(['fileUpload', 'product_id']);
                 $collection = $this->track_data($request->update_id, $collection);
@@ -162,15 +162,18 @@ class InventoryController extends BaseController
     {
         if ($request->ajax()) {
             if (permission('inventory-delete')) {
-                $pimage = $this->model->find($request->id);
-                $image = $pimage->image;
-                $result = $pimage->delete();
-                if ($result) {
-                    if (!empty($image)) {
-                        $this->delete_file($image, PRODUCT_MULTI_IMAGE_PATH);
-                    }
-                }
-                $output = $this->delete_message($result);
+                $inventory_varient = InventoryVariant::where('inventory_id',$request->id)->delete();
+                $inventory = $this->model->find($request->id);
+                $inventory->delete();
+
+//                $image = $pimage->image;
+//                $result = $pimage->delete();
+//                if ($result) {
+//                    if (!empty($image)) {
+//                        $this->delete_file($image, PRODUCT_MULTI_IMAGE_PATH);
+//                    }
+//                }
+                $output = $this->delete_message($inventory);
             } else {
                 $output = $this->access_blocked();
             }
