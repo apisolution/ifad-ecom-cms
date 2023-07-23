@@ -328,13 +328,23 @@
                             data.inventory_variants.map(function (val, key) {
                                 const rowId = `row-${rowCounter}`;
 
+                                var all_variant ='';
+                                data.variants.map(function(vari,ke){
+
+                                    if(vari.id==val.variant_id) {
+                                        all_variant+= "<option value="+vari.id+" <?php echo 'selected'; ?>>"+vari.name+"</option>";
+                                    }else{
+                                        all_variant+= "<option  value="+vari.id+">"+vari.name+"</option>";
+                                    }
+                                });
+
                                 var all_opt ='';
                                 data.all_variant_options.map(function(va,ke){
                                     if(va.variant_id==val.variant_id) {
                                         if(va.id==val.variant_option_id) {
-                                            all_opt+= "<option value="+va.variant_id+" selected>"+va.name+"</option>";
+                                            all_opt+= "<option value="+va.id+" <?php echo 'selected'; ?>>"+va.name+"</option>";
                                         }else{
-                                            all_opt+= "<option  value="+va.variant_id+">"+va.name+"</option>";
+                                            all_opt+= "<option  value="+va.id+">"+va.name+"</option>";
                                         }
 
                                     }
@@ -355,9 +365,7 @@
                                     div.innerHTML = `<div class="form-group col-md-3 required">
                                   <label for="variant_id[]">Variants</label>
                                   <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
-                                    @foreach ($variants as $variant)
-                                       <option value="{{ $variant->id }}">{{ $variant->name }}</option>
-                                    @endforeach
+                                       ${all_variant}
                                     </select>
                                   </div>
                                   <div class="form-group col-md-3 variant_option_id">
@@ -372,17 +380,10 @@
 
                                     // Append the new row to the 'content' element
                                     document.getElementById('content').appendChild(div);
-                                    all_opt ='';
+
                                     // Set the values for the selects in the new row
                                     $('.main-' + rowCounter).val(`${val.variant_id}`);
                                     $('.row-' + rowCounter).val(`${val.variant_option_id}`);
-
-                                    // Some additional adjustments to ensure the correct option is selected
-                                    setTimeout(function () {
-                                        $('.row-' + rowCounter).val(val.variant_option_id);
-                                        $(document).find('.row-' + rowCounter).val(val.variant_option_id);
-                                        $('.' + rowId).val(val.variant_option_id);
-                                    }, 1000);
 
                                     rowCounter++;
                                 }

@@ -11,6 +11,7 @@ use Modules\Inventory\Entities\Inventory;
 use Modules\Inventory\Http\Requests\InventoryFormRequest;
 use App\Models\InventoryImage;
 use DB;
+use Modules\Variant\Entities\Variant;
 use Modules\VariantOption\Entities\VariantOption;
 
 class InventoryController extends BaseController
@@ -29,8 +30,8 @@ class InventoryController extends BaseController
             $this->setPageData('Inventory Product', 'Inventory Product', 'fas fa-box');
             $data = [
                 'products' => Product::all(),
-                'variants' => DB::select('select * from variants'),
-                 'variant_options' => DB::select('select * from variant_options')
+                'variants' => Variant::get(),
+                 'variant_options' => VariantOption::get()
             ];
             return view('inventory::index', $data);
         } else {
@@ -92,6 +93,7 @@ class InventoryController extends BaseController
     public function store_or_update_data(InventoryFormRequest $request)
     {
         if ($request->ajax()) {
+
             if (permission('inventory-add') || permission('inventory-edit')) {
                 $collection = collect($request->validated())->except(['fileUpload', 'product_id']);
                 $collection = $this->track_data($request->update_id, $collection);
@@ -103,16 +105,26 @@ class InventoryController extends BaseController
                 //inventory variant option save start
                 $inventory['inventory_id'] = $result->id??0;
                 $inventory_variant_option = collect($inventory);
-                $inventory_variant_ids = $request->variant_id;
-                $variant_option_ids = $request->variant_option_id;
 
-                for($i=0;$i<count($request->variant_id); $i++){
-                    InventoryVariant::updateOrCreate(['inventory_id' => $request->update_id], [
-                        'inventory_id'=>$result->id??0,
-                        'variant_id'=>$inventory_variant_ids[$i],
-                        'variant_option_id'=>$variant_option_ids[$i],
-                    ]);
+                if(isset($request->update_id) && $request->update_id !==''){
+                    InventoryVariant::where('inventory_id',$request->update_id)->delete();
+                    for($i=0;$i<count($request->variant_id); $i++){
+                        InventoryVariant::create([
+                            'inventory_id'=>$request->update_id,
+                            'variant_id'=>$request->variant_id[$i],
+                            'variant_option_id'=>$request->variant_option_id[$i],
+                        ]);
+                    }
+                }else{
+                    for($i=0;$i<count($request->variant_id); $i++){
+                        InventoryVariant::create([
+                            'inventory_id'=>$result->id,
+                            'variant_id'=>$request->variant_id[$i],
+                            'variant_option_id'=>$request->variant_option_id[$i],
+                        ]);
+                    }
                 }
+
 
               $output = $this->store_message($result, $request->update_id);
               return response()->json($output);
@@ -135,6 +147,7 @@ class InventoryController extends BaseController
                 $data = $this->model->findOrFail($request->id);
                 $data->load('inventoryVariants');
                 $data['all_variant_options'] = VariantOption::get();
+                $data['variants'] = Variant::get();
                 $output = $this->data_message($data);
             } else {
                 $output = $this->access_blocked();
