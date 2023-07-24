@@ -80,6 +80,8 @@
                                 <th>Order Date</th>
                                 <th>Shipping Address</th>
                                 <th>Total</th>
+                                <th>Order Status</th>
+                                <th>Payment Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -381,15 +383,16 @@ $(document).ready(function(){
         }
     }
 
-    $(document).on('click', '.change_status', function () {
+    $(document).on('click', '.change_payment_status', function () {
         let id    = $(this).data('id');
-        let status = $(this).data('status');
+        let payment_status_id = $(this).data('status');
         let name  = $(this).data('name');
         let row   = table.row($(this).parent('tr'));
         let url   = "{{ route('order.change.status') }}";
-        change_status(id,status,name,table,url);
+        change_payment_status(id,payment_status_id,name,table,url);
 
     });
+
 
     $('#image').spartanMultiImagePicker({
         fieldName: 'image',

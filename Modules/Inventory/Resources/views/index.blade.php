@@ -312,41 +312,54 @@
             $(document).on('click', '.edit_data', function () {
                 $('#content').html('');
                 rowCounter=0;
+
                 let id = $(this).data('id');
+
                 $('#store_or_update_form')[0].reset();
                 $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
                 $('#store_or_update_form').find('.error').remove();
+
                 if (id) {
                     $.ajax({
-                        url: "{{route('inventory.edit')}}",
+                        url: "{{ route('inventory.edit') }}",
                         type: "POST",
-                        data: { id: id,_token: _token},
+                        data: { id: id, _token: _token},
                         dataType: "JSON",
                         success: function (data) {
-                            console.log(data)
-
+                            console.log(data);
+                            // return false;
                             data.inventory_variants.map(function (val, key) {
                                 const rowId = `row-${rowCounter}`;
 
-                                var all_opt ='';
-                                data.all_variant_options.map(function(va,ke){
-                                    if(va.variant_id==val.variant_id) {
-                                        if(va.id==val.variant_option_id) {
-                                            all_opt+= "<option value="+va.variant_id+" selected>"+va.name+"</option>";
-                                        }else{
-                                            all_opt+= "<option  value="+va.variant_id+">"+va.name+"</option>";
-                                        }
+                                var variantHtml ="<option value='' >Select please</option>";
+                                data.variants.map(function(variant, ke){
 
+                                    if(variant.id == val.variant_id) {
+                                        variantHtml += "<option value='" + variant.id + "' selected>" + variant.name + "</option>";
+                                    }else{
+                                        variantHtml += "<option  value=" + variant.id + ">" + variant.name + "</option>";
+                                    }
+                                });
+
+                                var variantOptionHtml ="<option value='' >Select please</option>";
+                                data.all_variant_options.map(function(variant_option, ke){
+                                    if(variant_option.variant_id == val.variant_id) {
+
+                                        if(variant_option.id == val.variant_option_id) {
+                                            variantOptionHtml += "<option value='" + variant_option.id + "' selected>" + variant_option.name + "</option>";
+                                        }else{
+                                            variantOptionHtml += "<option  value=" + variant_option.id + ">" + variant_option.name + "</option>";
+                                        }
                                     }
                                 });
 
                                 if (rowCounter == 0) {
                                     // Handle the first row differently
                                     $('.main-0').val(val.variant_id);
-                                    $('.row-0').html(all_opt);
-                                    $('.' + rowId).val(val.variant_option_id);
+                                    $('.row-0').html(variantOptionHtml);
+                                    $('.row-0').val(val.variant_option_id);
+                                    // $('.' + rowId).val(val.variant_option_id);
                                     rowCounter++;
-
                                 } else {
                                     // Create new row with variant and variant_option selects
                                     const div = document.createElement('div');
@@ -354,16 +367,14 @@
 
                                     div.innerHTML = `<div class="form-group col-md-3 required">
                                   <label for="variant_id[]">Variants</label>
-                                  <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
-                                    @foreach ($variants as $variant)
-                                       <option value="{{ $variant->id }}">{{ $variant->name }}</option>
-                                    @endforeach
+                                  <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value, 'row-${rowCounter}')" >
+                                       ${variantHtml}
                                     </select>
                                   </div>
                                   <div class="form-group col-md-3 variant_option_id">
                                     <label for="variant_option_id">Variant Option</label>
-                                    <select name="variant_option_id[]" id="variant_option_id" class="form-control row-${rowCounter}">
-                                        ${all_opt}
+                                    <select name="variant_option_id[]" id="variant_option_id" class="form-control selectpicker row-${rowCounter}">
+                                        ${variantOptionHtml}
                                     </select>
                                   </div>
                                   <div class="form-group col-md-6">
@@ -372,18 +383,6 @@
 
                                     // Append the new row to the 'content' element
                                     document.getElementById('content').appendChild(div);
-                                    all_opt ='';
-                                    // Set the values for the selects in the new row
-                                    $('.main-' + rowCounter).val(`${val.variant_id}`);
-                                    $('.row-' + rowCounter).val(`${val.variant_option_id}`);
-
-                                    // Some additional adjustments to ensure the correct option is selected
-                                    setTimeout(function () {
-                                        $('.row-' + rowCounter).val(val.variant_option_id);
-                                        $(document).find('.row-' + rowCounter).val(val.variant_option_id);
-                                        $('.' + rowId).val(val.variant_option_id);
-                                    }, 1000);
-
                                     rowCounter++;
                                 }
                             });
@@ -395,14 +394,18 @@
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
                             $('#store_or_update_form #sale_price').val(data.sale_price);
                             $('#store_or_update_form #offer_price').val(data.offer_price);
-                            // $('#store_or_update_form #offer_start').val(data.offer_start.substring(0,10));
-                            // $('#store_or_update_form #offer_end').val(data.offer_end.substring(0,10));
+                            if(data.offer_start){
+                                $('#store_or_update_form #offer_start').val(data.offer_start.substring(0,10));
+                            }
+                            if(data.offer_end) {
+                                $('#store_or_update_form #offer_end').val(data.offer_end.substring(0, 10));
+                            }
                             $('#store_or_update_form #sku').val(data.sku);
                             $('#store_or_update_form #stock_quantity').val(data.stock_quantity);
                             $('#store_or_update_form #reorder_quantity').val(data.reorder_quantity);
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
                             $('#store_or_update_form #variant').val(data.variant);
-                            $('#store_or_update_form #variant_option_id').val(data.variant_option_id);
+                            //$('#store_or_update_form #variant_option_id').val(data.variant_option_id);
 
                             const is_special_deal = document.getElementById('is_special_deal');
                             const is_manage_stock = document.getElementById('is_manage_stock');
@@ -412,8 +415,6 @@
                             if(data.is_manage_stock==1){
                                 is_manage_stock.checked= !is_manage_stock.checked;
                             }
-                            $('#store_or_update_form #is_special_deal').val(data.is_special_deal);
-                            $('#store_or_update_form #is_manage_stock').val(data.is_manage_stock);
 
                             // $('#store_or_update_form #old_image').val(data[0].image);
                             $('#store_or_update_form .selectpicker').selectpicker('refresh');
@@ -522,7 +523,7 @@
                 type:"GET",
                 dataType:"JSON",
                 success:function(data){
-                    var opt = '';
+                    var opt = "<option value=''>Select Please</option>";
                     const loadedContentDiv = `.${variant_option_id}`;
 
                     // $('#store_or_update_form #variant_option_id').empty();
@@ -562,26 +563,28 @@
             div.classList.add('row');
             div.innerHTML = `<div class="form-group col-md-3 required">
                                     <label for="variant_id[]">Variants</label>
-                                    <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
+                                    <select name="variant_id[]" id="variant_id[]" class="form-control selectpicker main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
+                                        <option value='' >Select please</option>
                                         @foreach ($variants as $variant)
-            <option value="{{ $variant->id }}">{{ $variant->name }}</option>
-                                                            @endforeach
-            </select>
-        </div>
+                                                <option value="{{ $variant->id }}">{{ $variant->name }}</option>
+                                        @endforeach
+                            </select>
+                        </div>
 
-<div class="form-group col-md-3 variant_option_id ">
-<label for="variant_option_id">Variant Option</label>
-<select name="variant_option_id[]" id="variant_option_id" class="form-control ${rowId}"></select>
-            </div>
-            <div class="form-group col-md-6 ">
-              <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">
-            </div>`; // Closing </div> added here
-            document.getElementById('content').appendChild(div);
-            rowCounter++;
-        }
-        function removeRow(input) {
-            input.parentNode.parentNode.remove();
-        }
+                <div class="form-group col-md-3 variant_option_id ">
+                <label for="variant_option_id">Variant Option</label>
+                <select name="variant_option_id[]" id="variant_option_id" class="form-control selectpicker ${rowId}"></select>
+                            </div>
+                            <div class="form-group col-md-6 ">
+                              <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">
+                            </div>`; // Closing </div> added here
+                            document.getElementById('content').appendChild(div);
+
+                            rowCounter++;
+                        }
+                        function removeRow(input) {
+                            input.parentNode.parentNode.remove();
+                        }
 
 
     </script>

@@ -63,6 +63,8 @@ class OrderController extends BaseController
                     $row[] = $value->order_date;
                     $row[] = $value->shipping_address;
                     $row[] = $value->total;
+                    $row[] = $value->total;
+                    $row[] = permission('order-edit') ? change_payment_status($value->id,$value->payment_status_id,$value->payment_status_id) : PAYMENT_STATUS_LABEL[$value->payment_status_id];;
                     $row[] = action_button($action);
                     $data[] = $row;
                 }
@@ -157,11 +159,11 @@ class OrderController extends BaseController
         }
     }
 
-    public function change_status(Request $request)
+    public function change_payment_status(Request $request)
     {
         if ($request->ajax()) {
             if (permission('order-edit')) {
-                $result = $this->model->find($request->id)->update(['status' => $request->status]);
+                $result = $this->model->find($request->id)->update(['payment_status_id' => $request->status]);
                 $output = $result ? ['status' => 'success', 'message' => 'Status has been changed successfully']
                     : ['status' => 'error', 'message' => 'Failed to change status'];
             } else {

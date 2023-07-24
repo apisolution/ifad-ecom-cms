@@ -65,6 +65,7 @@ define('STATUS_LABEL',
     ['1' => '<span class="badge badge-success">Active</span>',
         '2' => '<span class="badge badge-danger">Inactive</span>']);
 
+
 define('MODULE_FIELD_STATUS_LABEL',
     ['1' => '<span class="badge badge-success">Yes</span>',
         '2' => '<span class="badge badge-danger">No</span>']);
@@ -118,6 +119,13 @@ if (!function_exists('change_status')) {
     {
         return $status == 1 ? '<span class="badge badge-success change_status" data-id="' . $id . '" data-name="' . $name . '" data-status="2" style="cursor:pointer;">Active</span>' :
             '<span class="badge badge-danger change_status" data-id="' . $id . '" data-name="' . $name . '" data-status="1" style="cursor:pointer;">Inactive</span>';
+    }
+}
+if (!function_exists('change_payment_status')) {
+    function change_payment_status(int $id, int $status, string $name = null)
+    {
+        return $status == 1 ? '<span class="badge badge-success change_payment_status" data-id="' . $id . '" data-name="' . $name . '" data-status="2" style="cursor:pointer;">PAID</span>' :
+            '<span class="badge badge-danger change_payment_status" data-id="' . $id . '" data-name="' . $name . '" data-status="1" style="cursor:pointer;">UNPAID</span>';
     }
 }
 if (!function_exists('module_field_change_status')) {
