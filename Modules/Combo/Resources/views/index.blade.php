@@ -311,59 +311,118 @@ $(document).ready(function(){
     });
     });
 
-    $(document).on('click', '.edit_data', function () {
-        let id = $(this).data('id');
-        $('#store_or_update_form')[0].reset();
-        $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
-        $('#store_or_update_form').find('.error').remove();
-        if (id) {
-            $.ajax({
-                url: "{{route('combo.edit')}}",
-                type: "POST",
-                data: { id: id,_token: _token},
-                dataType: "JSON",
-                success: function (data) {
+     $(document).on('click', '.edit_data', function () {
+                $('#content').html('');
+                rowCounter=0;
 
-                    $('#store_or_update_form #update_id').val(data.id);
-                    $('#store_or_update_form #name').val(data.name);
-                    $('#store_or_update_form #description').val(data.description);
-                    $('#store_or_update_form #old_image').val(data.image);
-                    $('#store_or_update_form .selectpicker').selectpicker('refresh');
-                    if(data.image){
-                        var image = "{{ asset('storage/'.CONTENT_CATEGORY_IMAGE_PATH)}}/"+data.image;
-                        $('#store_or_update_form #image img.spartan_image_placeholder').css('display','none');
-                        $('#store_or_update_form #image .spartan_remove_row').css('display','none');
-                        $('#store_or_update_form #image .img_').css('display','block');
-                        $('#store_or_update_form #image .img_').attr('src',image);
-                    }else{
-                        $('#store_or_update_form #image img.spartan_image_placeholder').css('display','block');
-                        $('#store_or_update_form #image .spartan_remove_row').css('display','none');
-                        $('#store_or_update_form #image .img_').css('display','none');
-                        $('#store_or_update_form #image .img_').attr('src','');
-                    }
+                let id = $(this).data('id');
 
-                    $('#store_or_update_modal').modal({
-                        keyboard: false,
-                        backdrop: 'static',
+                $('#store_or_update_form')[0].reset();
+                $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
+                $('#store_or_update_form').find('.error').remove();
+
+                if (id) {
+                    $.ajax({
+                        url: "{{ route('combo.edit') }}",
+                        type: "POST",
+                        data: { id: id, _token: _token},
+                        dataType: "JSON",
+                        success: function (data) {
+                            console.log(data);
+                            // return false;
+                            data.inventory_combo_items.map(function (val, key) {
+                                const rowId = `row-${rowCounter}`;
+
+                                var inventoryHtml ="<option value='' >Select please</option>";
+                                data.all_inventory.map(function(inventory, ke){
+
+                                    if(inventory.id == val.inventory_id) {
+                                        inventoryHtml += "<option value='" + inventory.id + "' selected>" + inventory.title + "</option>";
+                                    }else{
+                                        inventoryHtml += "<option  value=" + inventory.id + ">" + inventory.title + "</option>";
+                                    }
+                                });
+
+                                
+
+                                if (rowCounter == 0) {
+                                    // Handle the first row differently
+                                    $('.main-0').val(val.inventory_id);
+                                    // $('.' + rowId).val(val.variant_option_id);
+                                    rowCounter++;
+                                } else {
+                                    // Create new row with variant and variant_option selects
+                                    const div = document.createElement('div');
+                                    div.classList.add('row');
+
+                                    div.innerHTML = `<div class="form-group col-md-6 required">
+                        <select name="inventory_id[]" id="inventory_id-${rowCounter}" class="form-control selectpicker" data-live-search="true">
+                            ${inventoryHtml}
+                        </select>
+                    </div>
+                        <div class="form-group col-md-6">
+                            <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">
+                        </div>`;
+
+                                    // Append the new row to the 'content' element
+                                    document.getElementById('content').appendChild(div);
+                                    rowCounter++;
+                                }
+                            });
+
+                            $('#store_or_update_form #update_id').val(data.id);
+                            $('#store_or_update_form #combo_category_id').val(data.combo_category_id);
+                            $('#store_or_update_form #title').val(data.title);
+                            $('#store_or_update_form #sku').val(data.sku);
+                            $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
+                            $('#store_or_update_form #sale_price').val(data.sale_price);
+                            $('#store_or_update_form #offer_price').val(data.offer_price);
+                            if(data.offer_start){
+                                $('#store_or_update_form #offer_start').val(data.offer_start.substring(0,10));
+                            }
+                            if(data.offer_end) {
+                                $('#store_or_update_form #offer_end').val(data.offer_end.substring(0, 10));
+                            }
+                            $('#store_or_update_form #sku').val(data.sku);
+                            $('#store_or_update_form #stock_quantity').val(data.stock_quantity);
+                            $('#store_or_update_form #reorder_quantity').val(data.reorder_quantity);
+                            $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
+                            //$('#store_or_update_form #variant_option_id').val(data.variant_option_id);
+
+                            const is_special_deal = document.getElementById('is_special_deal');
+                            const is_manage_stock = document.getElementById('is_manage_stock');
+                            if(data.is_special_deal==1){
+                                is_special_deal.checked= !is_special_deal.checked;
+                            }
+                            if(data.is_manage_stock==1){
+                                is_manage_stock.checked= !is_manage_stock.checked;
+                            }
+
+                            // $('#store_or_update_form #old_image').val(data[0].image);
+                            $('#store_or_update_form .selectpicker').selectpicker('refresh');
+
+                            $('#store_or_update_modal').modal({
+                                keyboard: false,
+                                backdrop: 'static',
+                            });
+                            $('#store_or_update_modal .modal-title').html(
+                                '<i class="fas fa-edit"></i> <span>Edit Inventory</span>');
+                            $('#store_or_update_modal #save-btn').text('Update');
+
+                        },
+                        error: function (xhr, ajaxOption, thrownError) {
+                            console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+                        }
                     });
-                    $('#store_or_update_modal .modal-title').html(
-                        '<i class="fas fa-edit"></i> <span>Edit ' + data.name + '</span>');
-                    $('#store_or_update_modal #save-btn').text('Update');
-
-                },
-                error: function (xhr, ajaxOption, thrownError) {
-                    console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
                 }
             });
-        }
-    });
 
 
 
 
     $(document).on('click', '.delete_data', function () {
         let id    = $(this).data('id');
-        let name  = $(this).data('name');
+        let name  = $(this).data('title');
         let row   = table.row($(this).parent('tr'));
         let url   = "{{ route('combo.delete') }}";
         delete_data(id, url, table, row, name);

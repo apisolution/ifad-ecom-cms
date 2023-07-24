@@ -68,7 +68,7 @@
 {{--                </x-form.selectbox>--}}
 
                     
-                    <x-form.selectbox labelName="Inventory" name="inventory_id[]" required="required" col="col-md-6" class="selectpicker">
+                    <x-form.selectbox labelName="Inventory" name="inventory_id[]" required="required" col="col-md-6" class="selectpicker main-0">
                         @if (!$Inventories->isEmpty())
                             @foreach ($Inventories as $Inventory)
                             <option value="{{ $Inventory->id }}">{{ $Inventory->title }}</option>

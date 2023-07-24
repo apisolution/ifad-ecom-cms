@@ -18,7 +18,7 @@ class ComboFormRequest extends FormRequest
         $rules['title']       = ['required'];
         $rules['sku']  = ['required','unique:combos,sku'];
         if(request()->update_id){
-            $rules['sku'][2] = 'unique:combos,sku,'.request()->update_id;
+            $rules['sku'] = 'unique:combos,sku,'.request()->update_id;
         }
         $rules['sale_price']       = ['nullable'];
         $rules['offer_price']       = ['nullable'];

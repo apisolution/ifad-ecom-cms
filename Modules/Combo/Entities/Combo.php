@@ -101,4 +101,8 @@ class Combo extends BaseModel
     {
         return \Modules\Combo\Database\factories\ComboFactory::new();
     }
+    public function inventoryComboItems()
+    {
+        return $this->hasMany(ComboItem::class, 'combo_id', 'id');
+    }
 }
