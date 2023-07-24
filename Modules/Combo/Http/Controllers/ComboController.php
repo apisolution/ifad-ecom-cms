@@ -5,13 +5,12 @@ namespace Modules\Combo\Http\Controllers;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Modules\Base\Http\Controllers\BaseController;
-use Modules\combo\Entities\comboVariant;
 use Modules\ComboCategory\Entities\ComboCategory;
 use Modules\Combo\Entities\Combo;
+use Modules\Combo\Entities\ComboItem;
 use Modules\Inventory\Entities\Inventory;
 use Modules\Combo\Http\Requests\ComboFormRequest;
 use DB;
-use Modules\Combo\Entities\ComboItem;
 
 class ComboController extends BaseController
 {
@@ -129,8 +128,8 @@ class ComboController extends BaseController
         if ($request->ajax()) {
             if (permission('combo-edit')) {
                 $data = $this->model->findOrFail($request->id);
-                $data->load('comboVariants');
-                $data['all_variant_options'] = VariantOption::get();
+                $data->load('inventoryComboItems');
+                $data['all_inventory'] = Inventory::get();
                 $output = $this->data_message($data);
             } else {
                 $output = $this->access_blocked();
@@ -145,15 +144,10 @@ class ComboController extends BaseController
     {
         if ($request->ajax()) {
             if (permission('combo-delete')) {
-                $pimage = $this->model->find($request->id);
-                $image = $pimage->image;
-                $result = $pimage->delete();
-                if ($result) {
-                    if (!empty($image)) {
-                        $this->delete_file($image, PRODUCT_MULTI_IMAGE_PATH);
-                    }
-                }
-                $output = $this->delete_message($result);
+                $combo_item = ComboItem::whereIn('combo_id',$request->id)->delete();
+                $combo = $this->model->find($request->id);
+                $combo->delete();
+                $output = $this->delete_message($combo);
             } else {
                 $output = $this->access_blocked();
             }
@@ -167,17 +161,8 @@ class ComboController extends BaseController
     {
         if ($request->ajax()) {
             if (permission('combo-bulk-delete')) {
-                $pimages = $this->model->toBase()->select('image')->whereIn('id', $request->ids)->get();
+                $combo_item = ComboItem::where('combo_id',$request->id)->delete();
                 $result = $this->model->destroy($request->ids);
-                if ($result) {
-                    if (!empty($pimages)) {
-                        foreach ($pimages as $pimage) {
-                            if ($pimage->image) {
-                                $this->delete_file($pimage->image, PRODUCT_MULTI_IMAGE_PATH);
-                            }
-                        }
-                    }
-                }
                 $output = $this->bulk_delete_message($result);
             } else {
                 $output = $this->access_blocked();
