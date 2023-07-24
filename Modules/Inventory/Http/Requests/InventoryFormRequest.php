@@ -15,11 +15,15 @@ class InventoryFormRequest extends FormRequest
     {
         $rules = [];
         $rules['product_id'] = ['required'];
-//        $rules['title'] = ['required','unique:inventories,title,id,'.$this->id];
-//        $rules['sku'] = ['required','unique:inventories,sku,id,'.$this->id];
+        $rules['title'] = ['required'];
+
+        if(request()->update_id){
+            $rules['sku'][2] = 'unique:inventories,sku,' . request()->update_id;
+        }else{
+            $rules['sku'] = ['required','unique:inventories,sku'];
+        }
         $rules['image']  = ['nullable','image','mimes:png,jpg'];
-        $rules['title']  = ['nullable'];
-        $rules['sku']  = ['nullable'];
+
         $rules['sale_price']  = ['nullable'];
         $rules['offer_price']  = ['nullable'];
         $rules['offer_start']  = ['nullable'];
@@ -30,6 +34,7 @@ class InventoryFormRequest extends FormRequest
         $rules['min_order_quantity']  = ['nullable'];
         $rules['is_special_deal']  = ['nullable'];
         $rules['is_manage_stock']  = ['nullable'];
+
         return $rules;
     }
 

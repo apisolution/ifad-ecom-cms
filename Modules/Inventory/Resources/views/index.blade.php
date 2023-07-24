@@ -328,7 +328,6 @@
                         success: function (data) {
                             console.log(data);
                             // return false;
-
                             data.inventory_variants.map(function (val, key) {
                                 const rowId = `row-${rowCounter}`;
 
@@ -359,9 +358,7 @@
                                     $('.main-0').val(val.variant_id);
                                     $('.row-0').html(variantOptionHtml);
                                     $('.row-0').val(val.variant_option_id);
-
                                     // $('.' + rowId).val(val.variant_option_id);
-
                                     rowCounter++;
                                 } else {
                                     // Create new row with variant and variant_option selects
@@ -376,7 +373,7 @@
                                   </div>
                                   <div class="form-group col-md-3 variant_option_id">
                                     <label for="variant_option_id">Variant Option</label>
-                                    <select name="variant_option_id[]" id="variant_option_id" class="form-control row-${rowCounter}">
+                                    <select name="variant_option_id[]" id="variant_option_id" class="form-control selectpicker row-${rowCounter}">
                                         ${variantOptionHtml}
                                     </select>
                                   </div>
@@ -386,13 +383,6 @@
 
                                     // Append the new row to the 'content' element
                                     document.getElementById('content').appendChild(div);
-
-                                    // Set the values for the selects in the new row
-                                    //$('.main-' + rowCounter).val(`${val.variant_id}`);
-                                    //console.log(rowCounter);
-                                    //$('.row-' + rowCounter).val(val.variant_option_id);
-                                    // $('.' + rowId).val(val.variant_option_id);
-
                                     rowCounter++;
                                 }
                             });
@@ -533,7 +523,7 @@
                 type:"GET",
                 dataType:"JSON",
                 success:function(data){
-                    var opt = "<option value=''>Please select</option>";
+                    var opt = "<option value=''>Select Please</option>";
                     const loadedContentDiv = `.${variant_option_id}`;
 
                     // $('#store_or_update_form #variant_option_id').empty();
@@ -573,26 +563,28 @@
             div.classList.add('row');
             div.innerHTML = `<div class="form-group col-md-3 required">
                                     <label for="variant_id[]">Variants</label>
-                                    <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
+                                    <select name="variant_id[]" id="variant_id[]" class="form-control selectpicker main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
+                                        <option value='' >Select please</option>
                                         @foreach ($variants as $variant)
-            <option value="{{ $variant->id }}">{{ $variant->name }}</option>
-                                                            @endforeach
-            </select>
-        </div>
+                                                <option value="{{ $variant->id }}">{{ $variant->name }}</option>
+                                        @endforeach
+                            </select>
+                        </div>
 
-<div class="form-group col-md-3 variant_option_id ">
-<label for="variant_option_id">Variant Option</label>
-<select name="variant_option_id[]" id="variant_option_id" class="form-control ${rowId}"></select>
-            </div>
-            <div class="form-group col-md-6 ">
-              <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">
-            </div>`; // Closing </div> added here
-            document.getElementById('content').appendChild(div);
-            rowCounter++;
-        }
-        function removeRow(input) {
-            input.parentNode.parentNode.remove();
-        }
+                <div class="form-group col-md-3 variant_option_id ">
+                <label for="variant_option_id">Variant Option</label>
+                <select name="variant_option_id[]" id="variant_option_id" class="form-control selectpicker ${rowId}"></select>
+                            </div>
+                            <div class="form-group col-md-6 ">
+                              <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">
+                            </div>`; // Closing </div> added here
+                            document.getElementById('content').appendChild(div);
+
+                            rowCounter++;
+                        }
+                        function removeRow(input) {
+                            input.parentNode.parentNode.remove();
+                        }
 
 
     </script>

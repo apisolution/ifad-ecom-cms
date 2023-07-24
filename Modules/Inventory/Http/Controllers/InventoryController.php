@@ -109,11 +109,13 @@ class InventoryController extends BaseController
                 if(isset($request->update_id) && $request->update_id !==''){
                     InventoryVariant::where('inventory_id',$request->update_id)->delete();
                     for($i=0;$i<count($request->variant_id); $i++){
-                        InventoryVariant::create([
-                            'inventory_id'=>$request->update_id,
-                            'variant_id'=>$request->variant_id[$i],
-                            'variant_option_id'=>$request->variant_option_id[$i],
-                        ]);
+                        if(isset($request->variant_id[$i]) && isset($request->variant_option_id[$i])){
+                            InventoryVariant::create([
+                                'inventory_id'=>$request->update_id,
+                                'variant_id'=>$request->variant_id[$i],
+                                'variant_option_id'=>$request->variant_option_id[$i],
+                            ]);
+                        }
                     }
                 }else{
                     for($i=0;$i<count($request->variant_id); $i++){
@@ -124,7 +126,6 @@ class InventoryController extends BaseController
                         ]);
                     }
                 }
-
 
               $output = $this->store_message($result, $request->update_id);
               return response()->json($output);
@@ -165,14 +166,6 @@ class InventoryController extends BaseController
                 $inventory_varient = InventoryVariant::where('inventory_id',$request->id)->delete();
                 $inventory = $this->model->find($request->id);
                 $inventory->delete();
-
-//                $image = $pimage->image;
-//                $result = $pimage->delete();
-//                if ($result) {
-//                    if (!empty($image)) {
-//                        $this->delete_file($image, PRODUCT_MULTI_IMAGE_PATH);
-//                    }
-//                }
                 $output = $this->delete_message($inventory);
             } else {
                 $output = $this->access_blocked();
@@ -187,17 +180,9 @@ class InventoryController extends BaseController
     {
         if ($request->ajax()) {
             if (permission('inventory-bulk-delete')) {
-                $pimages = $this->model->toBase()->select('image')->whereIn('id', $request->ids)->get();
+                $inventory_varient = InventoryVariant::whereIn('inventory_id',$request->ids)->delete();
                 $result = $this->model->destroy($request->ids);
-                if ($result) {
-                    if (!empty($pimages)) {
-                        foreach ($pimages as $pimage) {
-                            if ($pimage->image) {
-                                $this->delete_file($pimage->image, PRODUCT_MULTI_IMAGE_PATH);
-                            }
-                        }
-                    }
-                }
+
                 $output = $this->bulk_delete_message($result);
             } else {
                 $output = $this->access_blocked();

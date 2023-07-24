@@ -70,7 +70,7 @@
                     <div class="form-group col-md-3 required">
                         <label for="variant_id[]">Variants</label>
                         <select name="variant_id[]" id="variant_id[]" class="form-control main-0" onchange="getVariantOptionList(this.value,'row-0')" >
-                                <option value="">Select please</option>
+                                <option value=""> Select Please</option>
                             @foreach ($variants as $variant)
                                 <option value="{{ $variant->id }}">{{ $variant->name }}</option>
                             @endforeach
