@@ -76,9 +76,10 @@
                                 </th>
                                 @endif
                                 <th>Sl</th>
-                                <th>Name</th>
-                                <th>Image</th>
-                                <th>Description</th>
+                                <th>Combo Name</th>
+                                <th>SKU</th>
+                                <th>Combo Sale Price</th>
+                                <th>Combo Offer Price</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
