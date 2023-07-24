@@ -68,10 +68,13 @@ class ComboController extends BaseController
                     if (permission('combo-bulk-delete')) {
                         $row[] = table_checkbox($value->id);
                     }
+                  
                     $row[] = $no;
                     $row[] = $value->title;
+                    $row[] = $value->sku;
                     $row[] = $value->sale_price;
-                    $row[] = $value->stock_quantity;
+                    $row[] = $value->offer_price;
+                  
                     $row[] = permission('combo-edit') ? change_status($value->id, $value->status, $value->title) : STATUS_LABEL[$value->status];
 
                     $row[] = action_button($action);
@@ -144,7 +147,7 @@ class ComboController extends BaseController
     {
         if ($request->ajax()) {
             if (permission('combo-delete')) {
-                $combo_item = ComboItem::whereIn('combo_id',$request->id)->delete();
+                $combo_item = ComboItem::where('combo_id',$request->id)->delete();
                 $combo = $this->model->find($request->id);
                 $combo->delete();
                 $output = $this->delete_message($combo);
@@ -161,7 +164,7 @@ class ComboController extends BaseController
     {
         if ($request->ajax()) {
             if (permission('combo-bulk-delete')) {
-                $combo_item = ComboItem::where('combo_id',$request->id)->delete();
+                $combo_item = ComboItem::whereIn('combo_id',$request->ids)->delete();
                 $result = $this->model->destroy($request->ids);
                 $output = $this->bulk_delete_message($result);
             } else {
