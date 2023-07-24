@@ -386,13 +386,11 @@ $(document).ready(function(){
     $(document).on('click', '.change_payment_status', function () {
         let id    = $(this).data('id');
         let payment_status_id = $(this).data('status');
-        let name  = $(this).data('name');
+        let name  = '';
         let row   = table.row($(this).parent('tr'));
         let url   = "{{ route('order.change.status') }}";
         change_payment_status(id,payment_status_id,name,table,url);
-
     });
-
 
     $('#image').spartanMultiImagePicker({
         fieldName: 'image',
@@ -418,7 +416,33 @@ $(document).ready(function(){
 
 });
 
-
+function getOrderStatus(order_id,id) {
+    Swal.fire({
+        title: 'Are you sure to change ' + name + ' status?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes!'
+    }).then((result) => {
+        if (id) {
+            $.ajax({
+                url: "{{route('order.change.order_status')}}",
+                type: "POST",
+                data: {id: id, order_id: order_id, _token: _token},
+                dataType: "JSON",
+                success: function (data) {
+                    Swal.fire("Status Changed", data.message, "success").then(function () {
+                        table.ajax.reload(null, false);
+                    });
+                },
+                error: function () {
+                    Swal.fire('Oops...', "Somthing went wrong with ajax!", "error");
+                }
+            });
+        }
+    })
+}
 
 function showStoreFormModal(modal_title, btn_text)
 {

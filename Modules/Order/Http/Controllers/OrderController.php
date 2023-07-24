@@ -42,6 +42,7 @@ class OrderController extends BaseController
 
                 $data = [];
                 $no = $request->input('start');
+
                 foreach ($list as $value) {
 
                     $no++;
@@ -59,11 +60,20 @@ class OrderController extends BaseController
                     if (permission('order-bulk-delete')) {
                         $row[] = table_checkbox($value->id);
                     }
+                    $options = '<select name="order_status_id" id="order_status_id" class="form-control order_status_id" onchange="getOrderStatus(this.value, '.$value->id.')">
+                        <option value="">Select Please</option>
+                        <option '. ($value->order_status_id == 1 ? 'selected' : '') .' value="1">PENDING</option>
+                        <option '. ($value->order_status_id == 2 ? 'selected' : '') .' value="2">PROCESSING</option>
+                        <option '. ($value->order_status_id == 3 ? 'selected' : '') .' value="3">SHIPPED</option>
+                        <option '. ($value->order_status_id == 4 ? 'selected' : '') .' value="4">DELIVERED</option>
+                        <option '. ($value->order_status_id == 5 ? 'selected' : '') .' value="5">CANCELED</option>
+                    </select>';
+
                     $row[] = $no;
                     $row[] = $value->order_date;
                     $row[] = $value->shipping_address;
                     $row[] = $value->total;
-                    $row[] = $value->total;
+                    $row[] = $options;
                     $row[] = permission('order-edit') ? change_payment_status($value->id,$value->payment_status_id,$value->payment_status_id) : PAYMENT_STATUS_LABEL[$value->payment_status_id];;
                     $row[] = action_button($action);
                     $data[] = $row;
@@ -172,6 +182,19 @@ class OrderController extends BaseController
             return response()->json($output);
         } else {
             return response()->json($this->access_blocked());
+        }
+    }
+
+    public function change_order_status(Request $request){
+        if ($request->ajax()) {
+            if (permission('order-edit')) {
+                $result = $this->model->find($request->id)->update(['order_status_id' => $request->order_id]);
+                $output = $result ? ['status' => 'success', 'message' => 'Status has been changed successfully']
+                    : ['status' => 'error', 'message' => 'Failed to change status'];
+                return response()->json($output);
+            }else{
+                return response()->json($this->access_blocked());
+            }
         }
     }
 }

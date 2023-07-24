@@ -22,7 +22,7 @@ function showFormModal(modal_title, btn_text) {
 
 function select_all() {
     if($('#select_all:checked').length == 1){
-        $('.select_data').prop('checked',true); 
+        $('.select_data').prop('checked',true);
         if($('.select_data:checked').length >= 1)
         {
             $('.delete_btn').removeClass('d-none');
@@ -53,7 +53,7 @@ function notification(status,message)
           toast.addEventListener('mouseleave', Swal.resumeTimer)
         }
     });
-      
+
     Toast.fire({
         icon: status,
         title: message
@@ -158,10 +158,10 @@ function bulk_delete(ids,url,table,rows){
                 },
                 dataType: "JSON",
             }).done(function (response) {
-                
+
                 if(response.status == "success") {
                     Swal.fire("Deleted", response.message, "success").then(function () {
-                        
+
                         table.rows(rows).remove().draw(false);
                         $('#select_all').prop('checked',false);
                         $('.delete_btn').addClass('d-none');
@@ -177,8 +177,39 @@ function bulk_delete(ids,url,table,rows){
     });
 }
 
-
 function change_status(id,status,name,table,url)
+{
+    Swal.fire({
+        title: 'Are you sure to change ' + name + ' status?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes!'
+    }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: { id: id,status:status, _token: _token},
+                dataType: "JSON",
+            }).done(function (response) {
+                if (response.status == "success") {
+                    Swal.fire("Status Changed", response.message, "success").then(function () {
+                        table.ajax.reload(null, false);
+                    });
+                }
+                if (response.status == "error") {
+                    Swal.fire('Oops...', response.message, "error");
+                }
+            }).fail(function () {
+                Swal.fire('Oops...', "Somthing went wrong with ajax!", "error");
+            });
+        }
+    });
+}
+
+function change_payment_status(id,status,name,table,url)
 {
     Swal.fire({
         title: 'Are you sure to change ' + name + ' status?',
