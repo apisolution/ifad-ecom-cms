@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Inventory\Entities\Inventory;
 use Modules\Inventory\Entities\InventoryVariant;
+use Modules\Base\Entities\BaseModel;
 
-class ComboItem extends Model
+class ComboItem extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = ['id','combo_id','inventory_id','created_at','updated_at'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

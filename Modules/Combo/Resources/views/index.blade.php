@@ -30,7 +30,7 @@
                     <h2 class="dt-page__title mb-0 text-primary"><i class="{{ $page_icon }}"></i> {{ $sub_title }}</h2>
                 </div>
                 <!-- /entry heading -->
-                @if (permission('ccategory-add'))
+                @if (permission('combo-add'))
                 <button class="btn btn-primary btn-sm" onclick="showFormModal('Add New Content Category','Save')">
                     <i class="fas fa-plus-square"></i> Add New
                  </button>
@@ -67,7 +67,7 @@
                     <table id="dataTable" class="table table-striped table-bordered table-hover">
                         <thead class="bg-primary">
                             <tr>
-                                @if (permission('ccategory-bulk-delete'))
+                                @if (permission('combo-bulk-delete'))
                                 <th>
                                     <div class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" id="select_all" onchange="select_all()">
@@ -99,13 +99,14 @@
     <!-- /grid -->
 
 </div>
-@include('contentcategory::modal')
+@include('combo::modal')
 @endsection
 
 @push('script')
 <script src="js/spartan-multi-image-picker-min.js"></script>
 <script>
 var table;
+ let rowCounter = 0;
 $(document).ready(function(){
 
     table = $('#dataTable').DataTable({
@@ -127,7 +128,7 @@ $(document).ready(function(){
             zeroRecords: '<strong class="text-danger">No Data Found</strong>'
         },
         "ajax": {
-            "url": "{{route('ccategory.datatable.data')}}",
+            "url": "{{route('combo.datatable.data')}}",
             "type": "POST",
             "data": function (data) {
                 data.name        = $("#form-filter #name").val();
@@ -135,7 +136,7 @@ $(document).ready(function(){
             }
         },
         "columnDefs": [{
-                @if (permission('ccategory-bulk-delete'))
+                @if (permission('combo-bulk-delete'))
                 "targets": [0,5],
                 @else
                 "targets": [4],
@@ -144,7 +145,7 @@ $(document).ready(function(){
                 "className": "text-center"
             },
             {
-                @if (permission('ccategory-bulk-delete'))
+                @if (permission('combo-bulk-delete'))
                 "targets": [1,2,3,4,5],
                 @else
                 "targets": [0,1,3,4,5],
@@ -152,7 +153,7 @@ $(document).ready(function(){
                 "className": "text-center"
             },
             {
-                @if (permission('ccategory-bulk-delete'))
+                @if (permission('combo-bulk-delete'))
                 "targets": [4,5],
                 @else
                 "targets": [3,5],
@@ -165,7 +166,7 @@ $(document).ready(function(){
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'<'float-right'p>>>",
 
         "buttons": [
-            @if (permission('ccategory-report'))
+            @if (permission('combo-report'))
             {
                 'extend':'colvis','className':'btn btn-secondary btn-sm text-white','text':'Column'
             },
@@ -222,7 +223,7 @@ $(document).ready(function(){
                 },
             },
             @endif
-            @if (permission('ccategory-bulk-delete'))
+            @if (permission('combo-bulk-delete'))
             {
                 'className':'btn btn-danger btn-sm delete_btn d-none text-white',
                 'text':'Delete',
@@ -247,7 +248,7 @@ $(document).ready(function(){
     $(document).on('click', '#save-btn', function () {
         let form = document.getElementById('store_or_update_form');
         let formData = new FormData(form);
-        let url = "{{route('ccategory.store.or.update')}}";
+        let url = "{{route('combo.store.or.update')}}";
         let id = $('#update_id').val();
         let method;
         if (id) {
@@ -286,6 +287,7 @@ $(document).ready(function(){
                     }
 
                 });
+                 
             } else {
                 notification(data.status, data.message);
                 if (data.status == 'success') {
@@ -296,8 +298,10 @@ $(document).ready(function(){
                     }
                     $('#store_or_update_modal').modal('hide');
                     $(this).find('#store_or_update_modal').trigger('reset');
+                     document.getElementById('content').innerHTML = '';
 
                 }
+               
             }
 
         },
@@ -314,7 +318,7 @@ $(document).ready(function(){
         $('#store_or_update_form').find('.error').remove();
         if (id) {
             $.ajax({
-                url: "{{route('ccategory.edit')}}",
+                url: "{{route('combo.edit')}}",
                 type: "POST",
                 data: { id: id,_token: _token},
                 dataType: "JSON",
@@ -361,7 +365,7 @@ $(document).ready(function(){
         let id    = $(this).data('id');
         let name  = $(this).data('name');
         let row   = table.row($(this).parent('tr'));
-        let url   = "{{ route('ccategory.delete') }}";
+        let url   = "{{ route('combo.delete') }}";
         delete_data(id, url, table, row, name);
     });
 
@@ -380,7 +384,7 @@ $(document).ready(function(){
                 icon: 'warning',
             });
         }else{
-            let url = "{{route('ccategory.bulk.delete')}}";
+            let url = "{{route('combo.bulk.delete')}}";
             bulk_delete(ids,url,table,rows);
         }
     }
@@ -390,7 +394,7 @@ $(document).ready(function(){
         let status = $(this).data('status');
         let name  = $(this).data('name');
         let row   = table.row($(this).parent('tr'));
-        let url   = "{{ route('ccategory.change.status') }}";
+        let url   = "{{ route('combo.change.status') }}";
         change_status(id,status,name,table,url);
 
     });
@@ -432,6 +436,7 @@ function showStoreFormModal(modal_title, btn_text)
     $('#store_or_update_form #image .spartan_remove_row').css('display','none');
     $('#store_or_update_form #image .img_').css('display','none');
     $('#store_or_update_form #image .img_').attr('src','');
+
     $('.selectpicker').selectpicker('refresh');
     $('#store_or_update_modal').modal({
         keyboard: false,
@@ -440,5 +445,59 @@ function showStoreFormModal(modal_title, btn_text)
     $('#store_or_update_modal .modal-title').html('<i class="fas fa-plus-square"></i> '+modal_title);
     $('#store_or_update_modal #save-btn').text(btn_text);
 }
+
+// $('#store_or_update_form').on('click','.addnew',function(){
+
+//         console.log('clicked')
+    
+//     }); 
+
+ function addRow() {
+        const rowId = `row-${rowCounter}`;
+        const div = document.createElement('div');
+        div.classList.add('row');
+    
+
+        div.innerHTML = `<div class="form-group col-md-6 required">
+                        <select name="inventory_id[]" id="inventory_id-${rowCounter}" class="form-control" data-live-search="true">
+                            @if (!$Inventories->isEmpty())
+                            @foreach ($Inventories as $Inventory)
+                            <option value="{{ $Inventory->id }}">{{ $Inventory->title }}</option>
+                            @endforeach
+                        @endif
+                        </select>
+                    </div>
+                        <div class="form-group col-md-6">
+                            <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">
+                        </div>`;
+
+        document.getElementById('content').appendChild(div);
+
+        // Initialize the SelectPicker plugin for the newly created select box
+        
+        $(`#inventory_id-${rowCounter}`).selectpicker();
+        
+        // $(`#variant_id-${rowCounter}`).classList.add('data-live-search=true');	
+        // $(`#variant_id-${rowCounter}`).classList.add('selectpicker');
+        //  $('.selectpicker').selectpicker('refresh');
+
+        rowCounter++;
+    }
+
+    // Function to remove the row
+    function removeRow(button) {
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+
+    $(document).on('click', '#modal-close-btn', function () {
+       
+        document.getElementById('content').innerHTML = '';
+    });
+    //  $(document).on('click', '#save-btn', function () {
+       
+    //     document.getElementById('content').innerHTML = '';
+    // });
+       
 </script>
 @endpush

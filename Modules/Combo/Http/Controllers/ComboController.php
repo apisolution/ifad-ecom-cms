@@ -2,106 +2,36 @@
 
 namespace Modules\Combo\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-
-class ComboController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
-    public function index()
-    {
-        return view('combo::index');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
-    {
-        return view('combo::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
-    {
-        return view('combo::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('combo::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
-    {
-        //
-    }
-}
-
-
-namespace Modules\ContentCategory\Http\Controllers;
-
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Modules\Base\Http\Controllers\BaseController;
-use Modules\ContentCategory\Entities\ContentCategory;
-use Modules\ContentCategory\Http\Requests\ContentCategoryFormRequest;
+use Modules\combo\Entities\comboVariant;
+use Modules\ComboCategory\Entities\ComboCategory;
+use Modules\Combo\Entities\Combo;
+use Modules\Inventory\Entities\Inventory;
+use Modules\Combo\Http\Requests\ComboFormRequest;
+use DB;
+use Modules\Combo\Entities\ComboItem;
 
-class ContentCategoryController extends BaseController
+class ComboController extends BaseController
 {
     use UploadAble;
 
-    public function __construct(ContentCategory $model)
+    public function __construct(Combo $model)
     {
         $this->model = $model;
     }
 
     public function index()
     {
-        if (permission('ccategory-access')) {
-
-            $this->setPageData('Content Category', 'Content Category', 'fas fa-th-list');
-            return view('contentcategory::index');
+        // dd($this->model->getDatatableList());
+        if (permission('combo-access')) {
+            $this->setPageData('combo Product', 'combo Product', 'fas fa-box');
+            $data = [
+                'ComboCategories' => ComboCategory::all(),
+                'Inventories' => Inventory::all(),
+            ];
+            return view('combo::index', $data);
         } else {
             return $this->unauthorized_access_blocked();
         }
@@ -109,12 +39,13 @@ class ContentCategoryController extends BaseController
 
     public function get_datatable_data(Request $request)
     {
-        if (permission('ccategory-access')) {
-
-
+        if (permission('combo-access')) {
             if ($request->ajax()) {
                 if (!empty($request->name)) {
                     $this->model->setName($request->name);
+                }
+                if (!empty($request->product_id)) {
+                    $this->model->setProduct($request->product_id);
                 }
 
                 $this->set_datatable_default_property($request);
@@ -123,27 +54,27 @@ class ContentCategoryController extends BaseController
                 $data = [];
                 $no = $request->input('start');
                 foreach ($list as $value) {
+
                     $no++;
                     $action = '';
 
-                    if (permission('ccategory-edit')) {
+                    if (permission('combo-edit')) {
                         $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '"><i class="fas fa-edit text-primary"></i> Edit</a>';
                     }
-                    if (permission('ccategory-delete')) {
-                        $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->name . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
+                    if (permission('combo-delete')) {
+                        $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->title . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
                     }
 
-
                     $row = [];
-
-                    if (permission('ccategory-bulk-delete')) {
+                    if (permission('combo-bulk-delete')) {
                         $row[] = table_checkbox($value->id);
                     }
                     $row[] = $no;
-                    $row[] = $value->name;
-                    $row[] = table_image($value->image, CONTENT_CATEGORY_IMAGE_PATH, $value->name);
-                    $row[] = $value->description;
-                    $row[] = permission('ccategory-edit') ? change_status($value->id, $value->status, $value->name) : STATUS_LABEL[$value->status];;
+                    $row[] = $value->title;
+                    $row[] = $value->sale_price;
+                    $row[] = $value->stock_quantity;
+                    $row[] = permission('combo-edit') ? change_status($value->id, $value->status, $value->title) : STATUS_LABEL[$value->status];
+
                     $row[] = action_button($action);
                     $data[] = $row;
                 }
@@ -157,37 +88,49 @@ class ContentCategoryController extends BaseController
         }
     }
 
-    public function store_or_update_data(ContentCategoryFormRequest $request)
+    public function store_or_update_data(ComboFormRequest $request)
     {
         if ($request->ajax()) {
-            if (permission('ccategory-add') || permission('ccategory-edit')) {
-                $collection = collect($request->validated())->except(['image']);
+            if (permission('combo-add') || permission('combo-edit')) {
+                $collection = collect($request->validated())->except(['combo_category_id']);
                 $collection = $this->track_data($request->update_id, $collection);
-                $image = $request->old_image;
-                if ($request->hasFile('image')) {
-                    $image = $this->upload_file($request->file('image'), CONTENT_CATEGORY_IMAGE_PATH);
-
-                    if (!empty($request->old_image)) {
-                        $this->delete_file($request->old_image, CONTENT_CATEGORY_IMAGE_PATH);
-                    }
-                }
-                $collection = $collection->merge(compact('image'));
+                $combo_category_id = $request->combo_category_id;
+                $collection = $collection->merge(compact('combo_category_id'));
                 $result = $this->model->updateOrCreate(['id' => $request->update_id], $collection->all());
-                $output = $this->store_message($result, $request->update_id);
+                //$output = $this->store_message($result, $request->update_id);
+
+                //combo variant option save start
+                $combo['combo_id'] = $result->id??0;
+                $inventory_ids = $request->inventory_id;
+
+                for($i=0;$i<count($request->inventory_id); $i++){
+                    ComboItem::updateOrCreate(['combo_id' => $request->update_id], [
+                        'combo_id'=>$result->id??0,
+                        'inventory_id'=>$inventory_ids[$i],
+                    ]);
+                }
+
+              $output = $this->store_message($result, $request->update_id);
+              return response()->json($output);
+
             } else {
                 $output = $this->access_blocked();
+                return response()->json($output);
             }
-            return response()->json($output);
+
         } else {
             return response()->json($this->access_blocked());
         }
     }
 
+
     public function edit(Request $request)
     {
         if ($request->ajax()) {
-            if (permission('ccategory-edit')) {
+            if (permission('combo-edit')) {
                 $data = $this->model->findOrFail($request->id);
+                $data->load('comboVariants');
+                $data['all_variant_options'] = VariantOption::get();
                 $output = $this->data_message($data);
             } else {
                 $output = $this->access_blocked();
@@ -201,8 +144,15 @@ class ContentCategoryController extends BaseController
     public function delete(Request $request)
     {
         if ($request->ajax()) {
-            if (permission('ccategory-delete')) {
-                $result = $this->model->find($request->id)->delete();
+            if (permission('combo-delete')) {
+                $pimage = $this->model->find($request->id);
+                $image = $pimage->image;
+                $result = $pimage->delete();
+                if ($result) {
+                    if (!empty($image)) {
+                        $this->delete_file($image, PRODUCT_MULTI_IMAGE_PATH);
+                    }
+                }
                 $output = $this->delete_message($result);
             } else {
                 $output = $this->access_blocked();
@@ -216,8 +166,18 @@ class ContentCategoryController extends BaseController
     public function bulk_delete(Request $request)
     {
         if ($request->ajax()) {
-            if (permission('ccategory-bulk-delete')) {
+            if (permission('combo-bulk-delete')) {
+                $pimages = $this->model->toBase()->select('image')->whereIn('id', $request->ids)->get();
                 $result = $this->model->destroy($request->ids);
+                if ($result) {
+                    if (!empty($pimages)) {
+                        foreach ($pimages as $pimage) {
+                            if ($pimage->image) {
+                                $this->delete_file($pimage->image, PRODUCT_MULTI_IMAGE_PATH);
+                            }
+                        }
+                    }
+                }
                 $output = $this->bulk_delete_message($result);
             } else {
                 $output = $this->access_blocked();
@@ -231,7 +191,7 @@ class ContentCategoryController extends BaseController
     public function change_status(Request $request)
     {
         if ($request->ajax()) {
-            if (permission('ccategory-edit')) {
+            if (permission('combo-edit')) {
                 $result = $this->model->find($request->id)->update(['status' => $request->status]);
                 $output = $result ? ['status' => 'success', 'message' => 'Status has been changed successfully']
                     : ['status' => 'error', 'message' => 'Failed to change status'];
@@ -243,6 +203,4 @@ class ContentCategoryController extends BaseController
             return response()->json($this->access_blocked());
         }
     }
-
 }
-
