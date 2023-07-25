@@ -1,12 +1,14 @@
 <?php
 
 namespace Modules\Order\Http\Controllers;
-
+use App\Mail\OrderStatusChanged;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Modules\Base\Http\Controllers\BaseController;
 use Modules\Order\Entities\Order;
+use Modules\Customers\Entities\Customers;
 use Modules\Order\Http\Requests\OrderFormRequest;
+use Illuminate\Support\Facades\Mail;
 use DB;
 
 class OrderController extends BaseController
@@ -189,6 +191,62 @@ class OrderController extends BaseController
         if ($request->ajax()) {
             if (permission('order-edit')) {
                 $result = $this->model->find($request->id)->update(['order_status_id' => $request->order_id]);
+
+                $order=$this->model->find($request->id);
+
+                $customer=Customers::where('id','=',$order->customer_id)->first();
+                // Code to update the order status...
+
+                // Get the email address of the customer (you'll need to customize this according to your database structure)
+                $customerName = $customer->name;
+                $customerEmail = $customer->email;
+                
+
+
+                if($order->order_status_id == 1){
+                    //$order_status = 'PENDING';
+                    $order_status = [
+                        'status' => 'PENDING',
+                        'order_id' => $order->id,
+                        'customer_name' => $customerName,
+                    ];
+                }
+                if($order->order_status_id == 2){
+                    $order_status = [
+                        'status' => 'PROCESSING',
+                        'order_id' => $order->id,
+                        'customer_name' => $customerName,
+                    ];
+                }
+                if($order->order_status_id == 3){
+                    $order_status = [
+                        'status' => 'SHIPPED',
+                        'order_id' => $order->id,
+                        'customer_name' => $customerName,
+                    ];
+                }
+                if($order->order_status_id == 4){
+                    $order_status = [
+                        'status' => 'DELIVERED',
+                        'order_id' => $order->id,
+                        'customer_name' => $customerName,
+                    ];
+                }
+                if($order->order_status_id == 5){
+                    $order_status = [
+                        'status' => 'CANCELED',
+                        'order_id' => $order->id,
+                        'customer_name' => $customerName,
+                    ];
+                }
+                
+
+                
+
+                // Send the email
+                Mail::to($customerEmail)->send(new OrderStatusChanged($order_status));
+
+                // Return response or redirect...
                 $output = $result ? ['status' => 'success', 'message' => 'Status has been changed successfully']
                     : ['status' => 'error', 'message' => 'Failed to change status'];
                 return response()->json($output);
