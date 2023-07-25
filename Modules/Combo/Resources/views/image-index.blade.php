@@ -30,8 +30,8 @@
                     <h2 class="dt-page__title mb-0 text-primary"><i class="{{ $page_icon }}"></i> {{ $sub_title }}</h2>
                 </div>
                 <!-- /entry heading -->
-                @if (permission('pimage-add'))
-                <button class="btn btn-primary btn-sm" onclick="showFormModal('Add New Product','Save')">
+                @if (permission('comboimage-add'))
+                <button class="btn btn-primary btn-sm" onclick="showFormModal('Add New Combo Image','Save')">
                     <i class="fas fa-plus-square"></i> Add New
                  </button>
                 @endif
@@ -49,8 +49,8 @@
                     <form id="form-filter">
                         <div class="row">
                             <div class="form-group col-md-4">
-                                <label for="name">Product Name</label>
-                                <input type="text" class="form-control" name="name" id="name" placeholder="Enter Product Name">
+                                <label for="name">Combo Name</label>
+                                <input type="text" class="form-control" name="name" id="name" placeholder="Enter Combo Name">
                             </div>
                             <div class="form-group col-md-8 pt-24">
                                <button type="button" class="btn btn-danger btn-sm float-right" id="btn-reset"
@@ -67,7 +67,7 @@
                     <table id="dataTable" class="table table-striped table-bordered table-hover">
                         <thead class="bg-primary">
                             <tr>
-                                @if (permission('pimage-bulk-delete'))
+                                @if (permission('comboimage-bulk-delete'))
                                 <th>
                                     <div class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" id="select_all" onchange="select_all()">
@@ -76,7 +76,7 @@
                                 </th>
                                 @endif
                                 <th>Sl</th>
-                                <th>Product Name</th>
+                                <th>Combo Name</th>
                                 <th>Image</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -98,7 +98,7 @@
     <!-- /grid -->
 
 </div>
-@include('productimage::modal')
+@include('combo::image-modal')
 @endsection
 
 @push('script')
@@ -126,14 +126,14 @@ $(document).ready(function(){
             zeroRecords: '<strong class="text-danger">No Data Found</strong>'
         },
         "ajax": {
-            "url": "{{route('pimage.datatable.data')}}",
+            "url": "{{route('comboimage.datatable.data')}}",
             "type": "POST",
             "data": function (data) {
                 data._token      = _token;
             }
         },
         "columnDefs": [{
-                @if (permission('pimage-bulk-delete'))
+                @if (permission('comboimage-bulk-delete'))
                 "targets": [0,4],
                 @else
                 "targets": [3],
@@ -142,7 +142,7 @@ $(document).ready(function(){
                 "className": "text-center"
             },
             {
-                @if (permission('pimage-bulk-delete'))
+                @if (permission('comboimage-bulk-delete'))
                 "targets": [1,2,3,4],
                 @else
                 "targets": [0,1,2,3],
@@ -150,7 +150,7 @@ $(document).ready(function(){
                 "className": "text-center"
             },
             {
-                @if (permission('pimage-bulk-delete'))
+                @if (permission('comboimage-bulk-delete'))
                 "targets": [3,4],
                 @else
                 "targets": [2,3],
@@ -163,7 +163,7 @@ $(document).ready(function(){
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'<'float-right'p>>>",
 
         "buttons": [
-            @if (permission('pimage-report'))
+            @if (permission('comboimage-report'))
             {
                 'extend':'colvis','className':'btn btn-secondary btn-sm text-white','text':'Column'
             },
@@ -220,7 +220,7 @@ $(document).ready(function(){
                 },
             },
             @endif
-            @if (permission('pimage-bulk-delete'))
+            @if (permission('comboimage-bulk-delete'))
             {
                 'className':'btn btn-danger btn-sm delete_btn d-none text-white',
                 'text':'Delete',
@@ -245,7 +245,7 @@ $(document).ready(function(){
     $(document).on('click', '#save-btn', function (event) {
         let form = document.getElementById('store_or_update_form');
         let formData = new FormData(form);
-        let url = "{{route('pimage.store.or.update')}}";
+        let url = "{{route('comboimage.store.or.update')}}";
         let id = $('#update_id').val();
         let method;
         if (id) {
@@ -295,7 +295,7 @@ $(document).ready(function(){
                     }
 
                     $('#store_or_update_modal').modal('hide');
-                   $('#image').empty();
+                     $('#image').empty();
                     $('#image').spartanMultiImagePicker({
                         fieldName: 'fileUpload[]',
                         rowHeight: '100px',
@@ -307,6 +307,8 @@ $(document).ready(function(){
                             Swal.fire({ icon: 'error', title: 'Oops...', text: 'Only png, jpg, jpeg file format allowed!' });
                         }
                         });
+                    
+                 
 
                 }
             }
@@ -319,20 +321,21 @@ $(document).ready(function(){
     });
 
     $(document).on('click', '.edit_data', function () {
+      
         let id = $(this).data('id');
         $('#store_or_update_form')[0].reset();
         $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
         $('#store_or_update_form').find('.error').remove();
         if (id) {
             $.ajax({
-                url: "{{route('pimage.edit')}}",
+                url: "{{route('comboimage.edit')}}",
                 type: "POST",
                 data: { id: id,_token: _token},
                 dataType: "JSON",
                 success: function (data) {
 
                     $('#store_or_update_form #update_id').val(data.id);
-                    $('#store_or_update_form #product_id').val(data.product_id);
+                    $('#store_or_update_form #combo_id').val(data.combo_id);
                     $('#store_or_update_form #old_image').val(data.image);
                     $('#store_or_update_form .selectpicker').selectpicker('refresh');
                     if(data.image){
@@ -353,7 +356,7 @@ $(document).ready(function(){
                         backdrop: 'static',
                     });
                     $('#store_or_update_modal .modal-title').html(
-                        '<i class="fas fa-edit"></i> <span>Edit ' + data.product_id + '</span>');
+                        '<i class="fas fa-edit"></i> <span>Edit ' + data.combo_id + '</span>');
                     $('#store_or_update_modal #save-btn').text('Update');
 
                 },
@@ -371,7 +374,7 @@ $(document).ready(function(){
         let id    = $(this).data('id');
         let name  = $(this).data('name');
         let row   = table.row($(this).parent('tr'));
-        let url   = "{{ route('pimage.delete') }}";
+        let url   = "{{ route('comboimage.delete') }}";
         delete_data(id, url, table, row, name);
     });
 
@@ -390,7 +393,7 @@ $(document).ready(function(){
                 icon: 'warning',
             });
         }else{
-            let url = "{{route('pimage.bulk.delete')}}";
+            let url = "{{route('comboimage.bulk.delete')}}";
             bulk_delete(ids,url,table,rows);
         }
     }
@@ -400,7 +403,7 @@ $(document).ready(function(){
         let status = $(this).data('status');
         let name  = $(this).data('name');
         let row   = table.row($(this).parent('tr'));
-        let url   = "{{ route('pimage.change.status') }}";
+        let url   = "{{ route('comboimage.change.status') }}";
         change_status(id,status,name,table,url);
 
     });
