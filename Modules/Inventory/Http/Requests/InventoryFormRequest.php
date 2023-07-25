@@ -19,9 +19,10 @@ class InventoryFormRequest extends FormRequest
 
         if(request()->update_id){
             $rules['sku'][2] = 'unique:inventories,sku,' . request()->update_id;
-        }else{
-            $rules['sku'] = ['required','unique:inventories,sku'];
         }
+//        else{
+//            $rules['sku'] = ['required','unique:inventories,sku'];
+//        }
         $rules['image']  = ['nullable','image','mimes:png,jpg'];
 
         $rules['sale_price']  = ['nullable'];

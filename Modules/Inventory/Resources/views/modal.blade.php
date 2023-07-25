@@ -36,13 +36,13 @@
 
                     <x-form.textbox type="date" labelName="Offer End" name="offer_end" col="col-md-3" />
 
-                    <x-form.textbox labelName="SKU" name="sku" required="required" col="col-md-6" placeholder="Enter SKU"/>
+{{--                <x-form.textbox labelName="SKU" name="sku" required="required" col="col-md-6" placeholder="Enter SKU"/>--}}
+
+                    <x-form.textbox type="number" labelName="Min Order Quantity" name="min_order_quantity" placeholder="Enter Min Order Quantity" col="col-md-6" />
 
                     <x-form.textbox type="number" labelName="Stock Quantity" name="stock_quantity" col="col-md-3" placeholder="Enter Stock Quantity"/>
 
                     <x-form.textbox type="number" labelName="Reorder Quantity" name="reorder_quantity" placeholder="Enter Reorder Quantity" col="col-md-3" />
-
-                    <x-form.textbox type="number" labelName="Min Order Quantity" name="min_order_quantity" placeholder="Enter Min Order Quantity" col="col-md-6" />
 
 
                     <div class="form-group col-md-3">
@@ -60,7 +60,7 @@
                             <label class="form-check-label" for="is_manage_stock">Yes</label>
                         </li>
                     </div>
-
+                    <div class="form-group col-md-6"></div>
 {{--                <x-form.selectbox onchange="getVariantOptionList(this.value,'row-0')" labelName="Variants" name="variant_id[]" required="required" col="col-md-3" class="selectpicker main-0">--}}
 {{--                    @foreach ($variants as $variant)--}}
 {{--                       <option value="{{ $variant->id }}">{{ $variant->name }}</option>--}}

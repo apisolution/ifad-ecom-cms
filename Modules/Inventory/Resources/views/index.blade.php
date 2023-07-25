@@ -390,7 +390,7 @@
                             $('#store_or_update_form #update_id').val(data.id);
                             $('#store_or_update_form #product_id').val(data.product_id);
                             $('#store_or_update_form #title').val(data.title);
-                            $('#store_or_update_form #sku').val(data.sku);
+                            // $('#store_or_update_form #sku').val(data.sku);
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
                             $('#store_or_update_form #sale_price').val(data.sale_price);
                             $('#store_or_update_form #offer_price').val(data.offer_price);
@@ -400,7 +400,7 @@
                             if(data.offer_end) {
                                 $('#store_or_update_form #offer_end').val(data.offer_end.substring(0, 10));
                             }
-                            $('#store_or_update_form #sku').val(data.sku);
+                            // $('#store_or_update_form #sku').val(data.sku);
                             $('#store_or_update_form #stock_quantity').val(data.stock_quantity);
                             $('#store_or_update_form #reorder_quantity').val(data.reorder_quantity);
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);

@@ -98,9 +98,13 @@ class InventoryController extends BaseController
                 $collection = collect($request->validated())->except(['fileUpload', 'product_id']);
                 $collection = $this->track_data($request->update_id, $collection);
                 $product_id = $request->product_id;
-                $collection = $collection->merge(compact('product_id'));
+                if($request->update_id==''){
+                    $sku = self::getUniqueId($this->model);
+                    $collection = $collection->merge(compact('product_id','sku'));
+                }else{
+                    $collection = $collection->merge(compact('product_id'));
+                }
                 $result = $this->model->updateOrCreate(['id' => $request->update_id], $collection->all());
-                //$output = $this->store_message($result, $request->update_id);
 
                 //inventory variant option save start
                 $inventory['inventory_id'] = $result->id??0;
@@ -140,6 +144,18 @@ class InventoryController extends BaseController
         }
     }
 
+    public static function getUniqueId(Inventory $model) {
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $length = 9;
+        $id = '';
+        for ($i = 0; $i < $length; $i++) {
+            $id .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+        if ($model->where('sku', $id)->exists()) {
+            return self::getUniqueId($model);
+        }
+        return $id;
+    }
 
     public function edit(Request $request)
     {
