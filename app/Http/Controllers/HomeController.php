@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Modules\Customer\Entities\Customer;
-use Modules\Expense\Entities\Expense;
-use Modules\HRM\Entities\Payroll;
-use Modules\Purchase\Entities\Purchase;
-use Modules\Sale\Entities\Sale;
-use Modules\Supplier\Entities\Supplier;
+use Modules\Customers\Entities\Customers;
+use Carbon\Carbon;
+use Modules\Order\Entities\Order;
+use Modules\Inventory\Entities\Inventory;
+use Modules\Combo\Entities\Combo;
 
 class HomeController extends Controller
 {
@@ -20,8 +19,18 @@ class HomeController extends Controller
     {
         if (permission('dashboard-access')) {
             $this->setPageData('Dashboard','Dashboard','fas fa-tachometer-alt');
+            $customers = Customers::all()->count();
+            $total_orders = Order::all()->count();
+            $today_orders = Order::whereDate('created_at', Carbon::today())->get()->count();
+            $pending_orders = Order::where('order_status_id','=',1)->get()->count();
+            $process_orders = Order::where('order_status_id','=',2)->get()->count();
+            $shipped_orders = Order::where('order_status_id','=',3)->get()->count();
+            $delivered_orders = Order::where('order_status_id','=',4)->get()->count();
+            $cancel_orders = Order::where('order_status_id','=',5)->get()->count();
+            $inventory_qtys = Inventory::whereColumn('stock_quantity', '<=', 'reorder_quantity')->get();
+            $combo_qtys = Combo::whereColumn('stock_quantity', '<=', 'reorder_quantity')->get();
 
-            return view('home');
+            return view('home',compact('customers','total_orders','today_orders','pending_orders','process_orders','shipped_orders','delivered_orders','cancel_orders','inventory_qtys','combo_qtys'));
         }else{
             return $this->unauthorized_access_blocked();
         }
@@ -58,6 +67,7 @@ class HomeController extends Controller
             return response()->json($data);
         }
     }
+    
 
     public function unauthorized()
     {

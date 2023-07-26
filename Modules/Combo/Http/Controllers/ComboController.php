@@ -70,7 +70,11 @@ class ComboController extends BaseController
                     }
                   
                     $row[] = $no;
-                    $row[] = $value->title;
+                    if($value->stock_quantity <= $value->reorder_quantity){
+                        $row[] = '<span class="text-danger">'.$value->title.'</span>';
+                    }else{
+                        $row[] = $value->title;
+                    }
                     $row[] = $value->sku;
                     $row[] = $value->sale_price;
                     $row[] = $value->offer_price;

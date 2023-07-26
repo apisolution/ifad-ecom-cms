@@ -23,3 +23,16 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('change-status', 'ComboController@change_status')->name('change.status');
     });
 });
+
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('comboimage', 'ComboImageController@index')->name('comboimage');
+    Route::group(['prefix' => 'comboimage', 'as'=>'comboimage.'], function () {
+        Route::post('datatable-data', 'ComboImageController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'ComboImageController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'ComboImageController@edit')->name('edit');
+        Route::post('delete', 'ComboImageController@delete')->name('delete');
+        Route::post('bulk-delete', 'ComboImageController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'ComboImageController@change_status')->name('change.status');
+    });
+});

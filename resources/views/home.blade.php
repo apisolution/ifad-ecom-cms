@@ -5,30 +5,100 @@
 @endpush
 
 @section('content')
-<div class="dt-content">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="filter-toggle btn-group float-right">
-          <div class="btn btn-primary data-btn" data-start_date="{{ date('Y-m-d') }}" data-end_date="{{ date('Y-m-d') }}">Today</div>
-          <div class="btn btn-primary data-btn" data-start_date="{{ date('Y-m-d',strtotime('-7 day')) }}" data-end_date="{{ date('Y-m-d') }}">This Week</div>
-          <div class="btn btn-primary data-btn active" data-start_date="{{ date('Y-m').'-01' }}" data-end_date="{{ date('Y-m-d') }}">This Month</div>
-          <div class="btn btn-primary data-btn" data-start_date="{{ date('Y').'-01-01' }}" data-end_date="{{ date('Y').'-12-31' }}">This Year</div>
+<div class="d-flex flex-column-fluid">
+    <div class="container-fluid">
+        <div class="row mt-2">
+
+        <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="sale" class="m-1">{{ $customers }}</h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Total Customer</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="sale" class="m-1">{{ $total_orders }}</h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Total Order</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="sale" class="m-1">{{ $today_orders }} </h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Today Order</p>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="income" class="m-1">{{ $pending_orders }}</h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Pending Order</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="income" class="m-1">{{ $process_orders }}</h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Processing Order</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="income" class="m-1">{{ $shipped_orders }}</h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Shipped Order</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="income" class="m-1">{{ $delivered_orders }}</h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Delivered Order</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-5 pt-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        
+                    </span>
+                    <h6 id="income" class="m-1">{{ $cancel_orders }}</h6>
+                    <p class="font-weight-bold font-size-h7 mb-1">Cancel Order</p>
+                </div>
+            </div>
+
         </div>
-      </div>
+        <h3>Inventory Product Quantity Notification</h3>
+        @foreach($inventory_qtys as $inventory_qty)
+         <li>{{ $inventory_qty->title }} - Stock Qty ({{ $inventory_qty->stock_quantity }}) Less then Reorder Qty ({{ $inventory_qty->reorder_quantity }}).</li> </br>
+
+        @endforeach
+
+        <h3>Combo Product Quantity Notification</h3>
+        @foreach($combo_qtys as $combo_qty)
+         <li>{{ $combo_qty->title }} - Stock Qty ({{ $combo_qty->stock_quantity }}) Less then Reorder Qty ({{ $combo_qty->reorder_quantity }}).</li> </br>
+
+        @endforeach
     </div>
-    <!-- Grid -->
-
-
-    <div class="row pt-5">
-    </div>
-
-
-
-    <!-- Start :: Bar Chart-->
-    <div class="row">
-    </div>
-    <!-- End :: Bar Chart-->
-  </div>
+    
+</div>
 @endsection
 
 @push('script')
@@ -36,21 +106,7 @@
 <script>
 $(document).ready(function(){
 
-  $('.data-btn').on('click',function(){
-    $('.data-btn').removeClass('active');
-    $(this).addClass('active');
-    var start_date = $(this).data('start_date');
-    var end_date = $(this).data('end_date');
-
-    $.get("{{ url('dashboard-data') }}/"+start_date+'/'+end_date, function(data){
-      $('#sale').text(data.sale);
-      $('#purchase').text(data.purchase);
-      $('#profit').text(data.profit);
-      $('#expense').text(data.expense);
-      $('#customer').text(data.customer);
-      $('#supplier').text(data.supplier);
-    });
-  });
+  
 
 
   var brandPrimary;

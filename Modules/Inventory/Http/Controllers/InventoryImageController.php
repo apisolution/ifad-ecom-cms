@@ -1,30 +1,33 @@
 <?php
 
-namespace Modules\ProductImage\Http\Controllers;
+namespace Modules\Inventory\Http\Controllers;
 
-use App\Traits\UploadAble;
+use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use App\Traits\UploadAble;
+use Modules\Combo\Entities\Combo;
+use Modules\Inventory\Entities\Inventory;
+use Modules\Inventory\Entities\InventoryImage;
 use Modules\Base\Http\Controllers\BaseController;
-use Modules\Product\Entities\Product;
-use Modules\ProductImage\Entities\ProductImage;
-use Modules\ProductImage\Http\Requests\ProductImageFormRequest;
+use Modules\Inventory\Http\Requests\InventoryImageFormRequest;
 
-class ProductImageController extends BaseController
+class InventoryImageController extends BaseController
 {
-    use UploadAble;
-    public function __construct(ProductImage $model)
+   use UploadAble;
+    public function __construct(InventoryImage $model)
     {
         $this->model = $model;
     }
 
     public function index()
     {
-        if(permission('pimage-access')){
-            $this->setPageData('Product Image','Product Image','fas fa-box');
+        if(permission('inventoryimage-access')){
+            $this->setPageData('Inventory Image','Inventory Image','fas fa-box');
             $data = [
-                'products' => Product::all(),
+                'inventories' => Inventory::all(),
             ];
-            return view('productimage::index',$data);
+            return view('inventory::image-index',$data);
         }else{
             return $this->unauthorized_access_blocked();
         }
@@ -32,14 +35,14 @@ class ProductImageController extends BaseController
 
     public function get_datatable_data(Request $request)
     {
-        if(permission('pimage-access')){
+        if(permission('inventoryimage-access')){
             if($request->ajax()){
                 if (!empty($request->name)) {
                     $this->model->setName($request->name);
                 }
-                if (!empty($request->product_id)) {
-                    $this->model->setProduct($request->product_id);
-                }
+                // if (!empty($request->product_id)) {
+                //     $this->model->setProduct($request->product_id);
+                // }
 
                 $this->set_datatable_default_property($request);
                 $list = $this->model->getDatatableList();
@@ -51,22 +54,22 @@ class ProductImageController extends BaseController
                     $no++;
                     $action = '';
 
-                    if(permission('pimage-edit')){
+                    if(permission('inventoryimage-edit')){
                         $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '"><i class="fas fa-edit text-primary"></i> Edit</a>';
                     }
-                    if(permission('pimage-delete')){
-                        $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->product->name . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
+                    if(permission('inventoryimage-delete')){
+                        $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->inventory->title . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
                     }
 
                     $row = [];
 
-                    if(permission('pimage-bulk-delete')){
+                    if(permission('inventoryimage-bulk-delete')){
                         $row[] = table_checkbox($value->id);
                     }
                     $row[] = $no;
-                    $row[] = $value->product->name;
-                    $row[] = table_image($value->image,PRODUCT_MULTI_IMAGE_PATH,$value->product->name);
-                    $row[] = permission('pimage-edit') ? change_status($value->id,$value->status,$value->product->name) : STATUS_LABEL[$value->status];
+                    $row[] = $value->inventory->title;
+                    $row[] = table_image($value->image,INVENTORY_MULTI_IMAGE_PATH,$value->inventory->title);
+                    $row[] = permission('inventoryimage-edit') ? change_status($value->id,$value->status,$value->inventory->title) : STATUS_LABEL[$value->status];
 
 
 
@@ -83,36 +86,38 @@ class ProductImageController extends BaseController
         }
     }
 
-    public function store_or_update_data(ProductImageFormRequest $request)
+    public function store_or_update_data(InventoryImageFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('pimage-add') || permission('pimage-edit')){
-                $collection = collect($request->validated())->except(['fileUpload','product_id']);
+            if(permission('inventoryimage-add') || permission('inventoryimage-edit')){
+                $collection = collect($request->validated())->except(['fileUpload']);
                 $collection = $this->track_data($request->update_id,$collection);
+              
                 //$oldImage = $request->old_image;
                 if($request->hasFile('fileUpload')){
+
                     foreach($request->file('fileUpload') as $singleimage){
 
-                        $product_id=$request->product_id;
-                        $image = $this->upload_file($singleimage,PRODUCT_MULTI_IMAGE_PATH);
+                        $inventory_id=$request->inventory_id;
+                        $image = $this->upload_file($singleimage,INVENTORY_MULTI_IMAGE_PATH);
 
-                        $collection = $collection->merge(compact('product_id','image'));
+                        $collection = $collection->merge(compact('inventory_id','image'));
                         $result = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
                         $output = $this->store_message($result,$request->update_id);
                        // $allImage[] =$singleImage;
                     }
 
                     /* if(!empty($request->old_image)){
-                        $this->delete_file($request->old_image,PRODUCT_MULTI_IMAGE_PATH);
+                        $this->delete_file($request->old_image,INVENTORY_MULTI_IMAGE_PATH);
                     } */
                 }else{
+               
                 $result = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
                 $output = $this->store_message($result,$request->update_id);
+
                 }
-
-
-
-            }else{
+            }
+            else{
                 $output = $this->access_blocked();
             }
             return response()->json($output);
@@ -121,11 +126,10 @@ class ProductImageController extends BaseController
         }
     }
 
-
     public function edit(Request $request)
     {
         if($request->ajax()){
-            if(permission('pimage-edit')){
+            if(permission('inventoryimage-edit')){
                 $data = $this->model->findOrFail($request->id);
                 $output = $this->data_message($data);
             }else{
@@ -140,13 +144,13 @@ class ProductImageController extends BaseController
     public function delete(Request $request)
     {
         if($request->ajax()){
-            if(permission('pimage-delete')){
-                $pimage = $this->model->find($request->id);
-                $image = $pimage->image;
-                $result = $pimage->delete();
+            if(permission('inventoryimage-delete')){
+                $inventoryimage = $this->model->find($request->id);
+                $image = $inventoryimage->image;
+                $result = $inventoryimage->delete();
                 if($result){
                     if(!empty($image)){
-                        $this->delete_file($image,PRODUCT_MULTI_IMAGE_PATH);
+                        $this->delete_file($image,INVENTORY_MULTI_IMAGE_PATH);
                     }
                 }
                 $output = $this->delete_message($result);
@@ -162,14 +166,14 @@ class ProductImageController extends BaseController
     public function bulk_delete(Request $request)
     {
         if($request->ajax()){
-            if(permission('pimage-bulk-delete')){
-                $pimages = $this->model->toBase()->select('image')->whereIn('id',$request->ids)->get();
+            if(permission('inventoryimage-bulk-delete')){
+                $inventoryimages = $this->model->toBase()->select('image')->whereIn('id',$request->ids)->get();
                 $result = $this->model->destroy($request->ids);
                 if($result){
-                    if(!empty($pimages)){
-                        foreach ($pimages as $pimage) {
-                            if($pimage->image){
-                                $this->delete_file($pimage->image,PRODUCT_MULTI_IMAGE_PATH);
+                    if(!empty($inventoryimages)){
+                        foreach ($inventoryimages as $inventoryimage) {
+                            if($inventoryimage->image){
+                                $this->delete_file($inventoryimage->image,INVENTORY_MULTI_IMAGE_PATH);
                             }
                         }
                     }
@@ -187,7 +191,7 @@ class ProductImageController extends BaseController
     public function change_status(Request $request)
     {
         if($request->ajax()){
-            if (permission('pimage-edit')) {
+            if (permission('inventoryimage-edit')) {
                 $result = $this->model->find($request->id)->update(['status'=>$request->status]);
                 $output = $result ? ['status'=>'success','message'=>'Status has been changed successfully']
                 : ['status'=>'error','message'=>'Failed to change status'];
