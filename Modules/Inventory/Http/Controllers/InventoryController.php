@@ -72,7 +72,12 @@ class InventoryController extends BaseController
                         $row[] = table_checkbox($value->id);
                     }
                     $row[] = $no;
-                    $row[] = $value->title;
+                    if($value->stock_quantity <= $value->reorder_quantity){
+                        $row[] = '<span class="text-danger">'.$value->title.'</span>';
+                    }else{
+                        $row[] = $value->title;
+                    }
+                    
                     $row[] = $value->sale_price;
                     $row[] = $value->stock_quantity;
                     $row[] = permission('inventory-edit') ? change_status($value->id, $value->status, $value->title) : STATUS_LABEL[$value->status];
