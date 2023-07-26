@@ -18306,8 +18306,8 @@ a:focus {
     padding: 1.2rem 3.2rem;
     display: flex;
     align-items: center;
-    min-height: 60px;
-    max-height: 60px;
+    min-height: 40px;
+    max-height: 40px;
     margin-top: auto;
     border-top: solid 1px #e8e8e8
 }
@@ -27101,5 +27101,8 @@ div.dt-button-collection.dropdown-menu {
 
 .btn-secondary {
   color: white !important;
+}
+.d-flex.flex-column-fluid {
+    background-color: #14cbfa1a;
 }
 
