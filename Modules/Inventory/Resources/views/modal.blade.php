@@ -69,7 +69,7 @@
 
                     <div class="form-group col-md-3 required">
                         <label for="variant_id[]">Variants</label>
-                        <select name="variant_id[]" id="variant_id[]" class="form-control main-0" onchange="getVariantOptionList(this.value,'row-0')" >
+                        <select name="variant_id[]" id="variant_id[]" class="form-control selectpicker main-0" onchange="getVariantOptionList(this.value,'row-0')" data-live-search="true" >
                                 <option value=""> Select Please</option>
                             @foreach ($variants as $variant)
                                 <option value="{{ $variant->id }}">{{ $variant->name }}</option>
@@ -77,7 +77,7 @@
                         </select>
                     </div>
 
-                    <x-form.selectbox labelName="Variant Option" name="variant_option_id[]" col="col-md-3 variant_option_id" class="row-0 " />
+                    <x-form.selectbox labelName="Variant Option" name="variant_option_id[]" col="col-md-3 variant_option_id" class="row-0 form-control variant_option_id " />
 
 
                     <div class="form-group col-md-6 ">
@@ -93,7 +93,7 @@
 
             <!-- Modal Footer -->
             <div class="modal-footer">
-            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger btn-sm" id="close-btn" data-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary btn-sm" id="save-btn"></button>
             </div>
             <!-- /modal footer -->
