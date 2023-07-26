@@ -105,6 +105,7 @@ class Order extends BaseModel
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class, 'order_id', 'id')->with('inventory', 'combo');
+//        return $this->hasMany(OrderItem::class, 'order_id', 'id')->with('inventory', 'combo');
     }
 
     protected static function newFactory()

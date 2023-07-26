@@ -5,11 +5,16 @@ use App\Mail\OrderStatusChanged;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Modules\Base\Http\Controllers\BaseController;
+use Modules\Combo\Entities\Combo;
+use Modules\Inventory\Entities\Inventory;
 use Modules\Order\Entities\Order;
 use Modules\Customers\Entities\Customers;
+use Modules\Order\Entities\OrderItem;
 use Modules\Order\Http\Requests\OrderFormRequest;
 use Illuminate\Support\Facades\Mail;
 use DB;
+use Modules\PaymentMethod\Entities\PaymentMethod;
+use Modules\Product\Entities\Product;
 
 class OrderController extends BaseController
 {
@@ -24,7 +29,7 @@ class OrderController extends BaseController
     {
         if (permission('order-access')) {
             $this->setPageData('Order', 'Order', 'fas fa-box');
-            $data['payment_methods'] = DB::table('payment_methods')->get();
+            $data['payment_methods'] = PaymentMethod::get();
             return view('order::index',$data);
         } else {
             return $this->unauthorized_access_blocked();
@@ -97,6 +102,17 @@ class OrderController extends BaseController
                 $collection = collect($request->validated());
                 $collection = $this->track_data($request->update_id, $collection);
 
+                //order quantity update product_id
+                if(isset($request->product_id)){
+                    for($i=0;$i<count($request->product_id);$i++){
+                        if(isset($request->update_id,$request->type[$i],$request->product_id[$i],$request->quantity[$i]) && $request->type[$i]=='product'){
+                            OrderItem::where('order_id',$request->update_id)->where('inventory_id',$request->product_id[$i])->update(['quantity'=>$request->quantity[$i]]);
+                        }
+                        else if(isset($request->update_id,$request->type[$i],$request->product_id[$i],$request->quantity[$i]) && $request->type[$i]=='combo'){
+                            OrderItem::where('order_id',$request->update_id)->where('combo_id',$request->product_id[$i])->update(['quantity'=>$request->quantity[$i]]);
+                        }
+                    }
+                }
                 $result = $this->model->updateOrCreate(['id' => $request->update_id], $collection->all());
                 $output = $this->store_message($result, $request->update_id);
             } else {
@@ -114,7 +130,29 @@ class OrderController extends BaseController
         if ($request->ajax()) {
             if (permission('order-edit')) {
                 $data = $this->model->findOrFail($request->id);
+                $data->load('orderItems');
+                $data['inventories'] = Inventory::get();
+                $data['combos'] = Combo::get();
                 $output = $this->data_message($data);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
+    }
+    public function get_price(Request $request)
+    {
+        if ($request->ajax()) {
+            if (permission('order-edit')) {
+                $type = $request->type;
+                if($type=='combo'){
+                    $products = Combo::findOrFail($request->id);
+                }else{
+                    $products = Inventory::findOrFail($request->id);
+                }
+               return $products;
             } else {
                 $output = $this->access_blocked();
             }
@@ -200,7 +238,7 @@ class OrderController extends BaseController
                 // Get the email address of the customer (you'll need to customize this according to your database structure)
                 $customerName = $customer->name;
                 $customerEmail = $customer->email;
-                
+
 
 
                 if($order->order_status_id == 1){
@@ -239,9 +277,9 @@ class OrderController extends BaseController
                         'customer_name' => $customerName,
                     ];
                 }
-                
 
-                
+
+
 
                 // Send the email
                 Mail::to($customerEmail)->send(new OrderStatusChanged($order_status));

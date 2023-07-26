@@ -26,7 +26,7 @@ class OrderItem extends Model
      */
     public function inventory()
     {
-        return $this->belongsTo(Inventory::class, 'inventory_id', 'id')->with('product');
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'id');
     }
 
     /**
@@ -34,7 +34,8 @@ class OrderItem extends Model
      */
     public function combo()
     {
-        return $this->belongsTo(Combo::class, 'combo_id', 'id')->with('comboCategory', 'comboItems');
+        return $this->belongsTo(Combo::class, 'combo_id', 'id');
+//        return $this->belongsTo(Combo::class, 'combo_id', 'id')->with('comboCategory', 'comboItems');
     }
 
     protected static function newFactory()
