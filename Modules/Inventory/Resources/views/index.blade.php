@@ -373,7 +373,7 @@
                                   </div>
                                   <div class="form-group col-md-3 variant_option_id">
                                     <label for="variant_option_id">Variant Option</label>
-                                    <select name="variant_option_id[]" id="variant_option_id" class="form-control selectpicker row-${rowCounter}">
+                                    <select name="variant_option_id[]" id="variant_option_id" class="form-control row-${rowCounter}">
                                         ${variantOptionHtml}
                                     </select>
                                   </div>
@@ -390,7 +390,7 @@
                             $('#store_or_update_form #update_id').val(data.id);
                             $('#store_or_update_form #product_id').val(data.product_id);
                             $('#store_or_update_form #title').val(data.title);
-                            $('#store_or_update_form #sku').val(data.sku);
+                            // $('#store_or_update_form #sku').val(data.sku);
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
                             $('#store_or_update_form #sale_price').val(data.sale_price);
                             $('#store_or_update_form #offer_price').val(data.offer_price);
@@ -400,7 +400,7 @@
                             if(data.offer_end) {
                                 $('#store_or_update_form #offer_end').val(data.offer_end.substring(0, 10));
                             }
-                            $('#store_or_update_form #sku').val(data.sku);
+                            // $('#store_or_update_form #sku').val(data.sku);
                             $('#store_or_update_form #stock_quantity').val(data.stock_quantity);
                             $('#store_or_update_form #reorder_quantity').val(data.reorder_quantity);
                             $('#store_or_update_form #min_order_quantity').val(data.min_order_quantity);
@@ -544,7 +544,6 @@
 
                     $('#store_or_update_form .selectpicker').selectpicker('refresh');
 
-
                 },
             });
         }
@@ -563,7 +562,7 @@
             div.classList.add('row');
             div.innerHTML = `<div class="form-group col-md-3 required">
                                     <label for="variant_id[]">Variants</label>
-                                    <select name="variant_id[]" id="variant_id[]" class="form-control selectpicker main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
+                                    <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value,'row-${rowCounter}')" >
                                         <option value='' >Select please</option>
                                         @foreach ($variants as $variant)
                                                 <option value="{{ $variant->id }}">{{ $variant->name }}</option>
@@ -573,7 +572,7 @@
 
                 <div class="form-group col-md-3 variant_option_id ">
                 <label for="variant_option_id">Variant Option</label>
-                <select name="variant_option_id[]" id="variant_option_id" class="form-control selectpicker ${rowId}"></select>
+                <select name="variant_option_id[]" id="variant_option_id" class="form-control ${rowId}"></select>
                             </div>
                             <div class="form-group col-md-6 ">
                               <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">

@@ -17,6 +17,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('datatable-data', 'CustomersController@get_datatable_data')->name('datatable.data');
         Route::post('store-or-update', 'CustomersController@store_or_update_data')->name('store.or.update');
         Route::post('edit', 'CustomersController@edit')->name('edit');
+        Route::post('view', 'CustomersController@view')->name('view');
         Route::post('delete', 'CustomersController@delete')->name('delete');
         Route::post('bulk-delete', 'CustomersController@bulk_delete')->name('bulk.delete');
         Route::post('change-status', 'CustomersController@change_status')->name('change.status');

@@ -71,6 +71,7 @@
                                 @endif
 				<th>Type Id</th>
                                 <th>Name</th>
+                                <th>Email</th>
                                 <th>Address</th>
                                 <th>Action</th>
                             </tr>
@@ -92,6 +93,7 @@
 
 </div>
 @include('customers::modal')
+@include('customers::view_modal')
 @endsection
 
 @push('script')
@@ -238,6 +240,37 @@ $(document).ready(function(){
             method = 'add';
         }
         store_or_update_data(table, method, url, formData);
+    });
+
+    $(document).on('click', '.view_data', function () {
+        let id = $(this).data('id');
+
+        if (id) {
+            $.ajax({
+                url: "{{route('customers.view')}}",
+                type: "POST",
+                data: { id: id,_token: _token},
+                dataType: "JSON",
+                success: function (data) {
+                    // console.log(data);
+                    $('.name_is').html(data.name);
+                    $('.email_is').html(data.email);
+                    $('.address_is').html(data.address);
+                    $('.date_of_birth_is').html(data.date_of_birth);
+                    $('.gender_is').html(data.gender);
+                    $('.phone_number_is').html(data.phone_number);
+
+                    $('#view_data_modal').modal({
+                        keyboard: false,
+                        backdrop: 'static',
+                    });
+
+                },
+                error: function (xhr, ajaxOption, thrownError) {
+                    console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+                }
+            });
+        }
     });
 
     $(document).on('click', '.edit_data', function () {

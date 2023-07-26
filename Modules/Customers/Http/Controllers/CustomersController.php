@@ -44,6 +44,9 @@ class CustomersController extends BaseController
                     if(permission('customer-edit')){
                         $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '"><i class="fas fa-edit text-primary"></i> Edit</a>';
                     }
+
+                        $action .= ' <a class="dropdown-item view_data" data-id="' . $value->id . '"><i class="fas fa-eye text-primary"></i> View</a>';
+
                     if(permission('customer-delete')){
                         $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->name . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
                     }
@@ -56,6 +59,7 @@ class CustomersController extends BaseController
                     }
                     $row[] = $value->id;
                     $row[] = $value->name;
+                    $row[] = $value->email;
                     $row[] = $value->address;;
                     $row[] = action_button($action);
                     $data[] = $row;
@@ -88,6 +92,20 @@ class CustomersController extends BaseController
     }
 
     public function edit(Request $request)
+    {
+        if($request->ajax()){
+            if(permission('customer-edit')){
+                $data = $this->model->findOrFail($request->id);
+                $output = $this->data_message($data);
+            }else{
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        }else{
+            return response()->json($this->access_blocked());
+        }
+    }
+    public function view(Request $request)
     {
         if($request->ajax()){
             if(permission('customer-edit')){
