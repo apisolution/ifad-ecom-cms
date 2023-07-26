@@ -22,3 +22,14 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('change-status', 'InventoryController@change_status')->name('change.status');
     });
 });
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('inventoryimage', 'InventoryImageController@index')->name('inventoryimage');
+    Route::group(['prefix' => 'inventoryimage', 'as'=>'inventoryimage.'], function () {
+        Route::post('datatable-data', 'InventoryImageController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'InventoryImageController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'InventoryImageController@edit')->name('edit');
+        Route::post('delete', 'InventoryImageController@delete')->name('delete');
+        Route::post('bulk-delete', 'InventoryImageController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'InventoryImageController@change_status')->name('change.status');
+    });
+});
