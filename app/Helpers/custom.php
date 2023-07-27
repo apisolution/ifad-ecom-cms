@@ -65,6 +65,13 @@ define('STATUS_LABEL',
     ['1' => '<span class="badge badge-success">Active</span>',
         '2' => '<span class="badge badge-danger">Inactive</span>']);
 
+define('REVIEW_LABEL',
+['1' => '<span class="text-success">1*</span>',
+'2' => '<span class="text-success">2*</span>',
+'3' => '<span class="text-success">3*</span>',
+'4' => '<span class="text-success">4*</span>',
+'5' => '<span class="text-success">5*</span>']);
+
 
 define('MODULE_FIELD_STATUS_LABEL',
     ['1' => '<span class="badge badge-success">Yes</span>',

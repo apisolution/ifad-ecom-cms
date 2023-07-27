@@ -3,10 +3,16 @@
 namespace Modules\Customers\Entities;
 
 use Modules\Base\Entities\BaseModel;
+use Modules\Review\Entities\Review;
 
 class Customers extends BaseModel
 {
     protected $fillable = ['name','address','created_at','updated_at'];
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'customer_id', 'id');
+    }
 
     protected $name;
 

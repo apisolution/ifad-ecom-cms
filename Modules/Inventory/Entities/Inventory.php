@@ -17,6 +17,11 @@ class Inventory extends BaseModel
         'offer_start','offer_end','stock_quantity','reorder_quantity','is_special_deal',
         'is_manage_stock','min_order_quantity','status','created_at','updated_at'];
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'customer_id', 'id');
+    }
+
     protected $name;
 
     public function setName($name)
