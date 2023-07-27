@@ -27,11 +27,7 @@
                 <div class="row">
                     <x-form.textbox type="number" labelName="Shipping Charge" name="shipping_charge" col="col-md-6" placeholder="Enter shipping charge"/>
                     <x-form.selectbox labelName="Payment Method" name="payment_method_id" required="required" col="col-md-6 selectpicker">
-                        @if (!$payment_methods->isEmpty())
-                            @foreach ($payment_methods as $payment_method)
-                            <option value="{{ $payment_method->id }}">{{ $payment_method->name }}</option>
-                            @endforeach
-                        @endif
+
                     </x-form.selectbox>
                 </div>
 
@@ -52,19 +48,19 @@
 
                 {{--order item edit--}}
                 <div class="row">
-                <div class="form-group col-md-4 required">
-                    <label class="mb-3" for="product-0">Product</label>
+                <div class="form-group col-md-6 required">
+                    <label for="product-0">Product</label>
                     <div class="product-0"></div>
 {{--                    <select name="product_id[]" id="product-0" class="form-control product-0" onchange="getPrice(this.value,$('.type-0').val(),'price-0')" >--}}
 {{--                    </select>--}}
                 </div>
 
-                <div class="form-group col-md-4 price_id ">
+                <div class="form-group col-md-3 price_id ">
                     <label for="price[]">Price</label>
                     <input type="number" disabled name="price[]" class="form-control price-0" value="" placeholder="Enter price">
                     <input type="hidden" class="type-0" name="type[]">
                 </div>
-                <x-form.textbox type="number" Placeholder="Enter Quantity" labelName="Quantity" name="quantity[]" col="col-md-4 quantity_id" class="quantity-0" />
+                <x-form.textbox type="number" Placeholder="Enter Quantity" labelName="Quantity" name="quantity[]" col="col-md-3 quantity_id" class="quantity-0" />
 
                 </div>
 

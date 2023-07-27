@@ -43,8 +43,8 @@
                         <form id="form-filter">
                             <div class="row">
                                 <div class="form-group col-md-4">
-                                    <label for="name">Shipping Address</label>
-                                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter shipping address">
+                                    <label for="name">Name</label>
+                                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter name">
                                 </div>
                             <!-- <x-form.selectbox labelName="Category Name" name="catgory_id" col="col-md-3" class="selectpicker">
 {{--                                @if (!$Categories->isEmpty())--}}
@@ -68,20 +68,11 @@
                         <table id="dataTable" class="table table-striped table-bordered table-hover">
                             <thead class="bg-primary">
                             <tr>
-                                @if (permission('order-bulk-delete'))
-                                    <th>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="select_all" onchange="select_all()">
-                                            <label class="custom-control-label" for="select_all"></label>
-                                        </div>
-                                    </th>
-                                @endif
                                 <th>Sl</th>
-                                <th>Order Date</th>
-                                <th>Shipping Address</th>
-                                <th>Total</th>
-                                <th>Order Status</th>
-                                <th>Payment Status</th>
+                                <th>Name</th>
+                                <th>Country Name</th>
+                                <th>Product code</th>
+                                <th>Status</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -101,7 +92,7 @@
         <!-- /grid -->
 
     </div>
-    @include('order::modal')
+    @include('b2b::view_modal')
 @endsection
 
 @push('script')
@@ -130,7 +121,7 @@
                     zeroRecords: '<strong class="text-danger">No Data Found</strong>'
                 },
                 "ajax": {
-                    "url": "{{route('order.datatable.data')}}",
+                    "url": "{{route('b2b.datatable.data')}}",
                     "type": "POST",
                     "data": function (data) {
                         data.name        = $("#form-filter #name").val();
@@ -139,7 +130,7 @@
                     }
                 },
                 "columnDefs": [{
-                    @if (permission('order-bulk-delete'))
+                    @if (permission('b2b-bulk-delete'))
                     "targets": [0,5],
                     @else
                     "targets": [4],
@@ -148,7 +139,7 @@
                     "className": "text-center"
                 },
                     {
-                        @if (permission('order-bulk-delete'))
+                        @if (permission('b2b-bulk-delete'))
                         "targets": [1,2,3,4,5],
                         @else
                         "targets": [0,1,3,4,5],
@@ -156,7 +147,7 @@
                         "className": "text-center"
                     },
                     {
-                        @if (permission('order-bulk-delete'))
+                        @if (permission('b2b-bulk-delete'))
                         "targets": [4,5],
                         @else
                         "targets": [3,5],
@@ -169,7 +160,7 @@
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'<'float-right'p>>>",
 
                 "buttons": [
-                        @if (permission('order-report'))
+                        @if (permission('b2b-report'))
                     {
                         'extend':'colvis','className':'btn btn-secondary btn-sm text-white','text':'Column'
                     },
@@ -226,7 +217,7 @@
                         },
                     },
                         @endif
-                        @if (permission('order-bulk-delete'))
+                        @if (permission('b2b-bulk-delete'))
                     {
                         'className':'btn btn-danger btn-sm delete_btn d-none text-white',
                         'text':'Delete',
@@ -251,7 +242,7 @@
             $(document).on('click', '#save-btn', function () {
                 let form = document.getElementById('store_or_update_form');
                 let formData = new FormData(form);
-                let url = "{{route('order.store.or.update')}}";
+                let url = "{{route('b2b.store.or.update')}}";
                 let id = $('#update_id').val();
                 let method;
                 if (id) {
@@ -311,107 +302,46 @@
                 });
             });
 
-            $(document).on('click', '.edit_data', function () {
+            $(document).on('click', '.view_data', function () {
                 let id = $(this).data('id');
-                var productHtml='';
-                $('#content').html('');
-                rowCounter=0;
-                $('#store_or_update_form')[0].reset();
-                $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
-                $('#store_or_update_form').find('.error').remove();
                 if (id) {
                     $.ajax({
-                        url: "{{route('order.edit')}}",
+                        url: "{{route('b2b.view')}}",
                         type: "POST",
                         data: { id: id,_token: _token},
                         dataType: "JSON",
                         success: function (data) {
-                            table.ajax.reload();
-                            console.log(data.order_items);
-                            rowCounter=0;
+                            console.log(data);
+                            $('.modal-title').html('B2B View');
+                            $('.name').html(data.name);
+                            $('.country_name').html(data.country_name);
+                            $('.product_name').html(data.product_name);
+                            $('.product_code').html(data.product_code);
+                            $('.product_quantity').html(data.product_quantity);
+                            $('.contact_number').html(data.contact_number);
+                            $('.email_address').html(data.email_address);
+                            var status = data.status;
+                            var status_name = '';
+                            if(status==1){
+                                status_name = 'PENDING';
+                            }else if(status==2){
+                                status_name = 'IN PROGRESS';
+                            }else if(status==3){
+                                status_name = 'PROCESSING';
+                            }else if(status==4){
+                                status_name = 'COMMUNICATED';
+                            }else if(status==5){
+                                status_name = 'CANCELLED';
+                            }
+                            $('.status').html(status_name );
 
-                            data.order_items.map(function (order_item, key) {
-                                const productId = `product-${rowCounter}`;
-                                const priceId = `price-${rowCounter}`;
-                                const quantityId = `quantity-${rowCounter}`;
-
-                                var priceInteger =order_item.unit_price;
-                                var quantityInteger =order_item.quantity;
-
-                                if(order_item.type=='product'){
-                                    productHtml ="";
-                                    data.inventories.map(function(inventory, ke){
-
-                                        if(inventory.id == order_item.inventory_id) {
-                                            productHtml += "<input type='hidden' name='product_id[]' value='" + inventory.id + "'>" + inventory.title + "";
-                                        }
-                                    });
-                                }else if(order_item.type=='combo'){
-                                    productHtml ='';
-                                    data.combos.map(function(combo, key){
-                                        if(combo.id == order_item.combo_id) {
-                                            productHtml += "<input type='hidden' name='product_id[]' value='" + combo.id + "'>" + combo.title + "";
-                                        }
-                                    });
-                                }
-
-                                if (rowCounter == 0) {
-                                    // Handle the first row differently
-                                    $('.product-0').html(productHtml);
-                                    $('.price-0').val(priceInteger);
-                                    $('.quantity-0').val(quantityInteger);
-                                    $('.type-0').val(order_item.type);
-                                    rowCounter++;
-                                } else if(rowCounter>0) {
-                                    console.log(rowCounter);
-                                    console.log('rowCounter');
-                                    // Create new row with variant and variant_option selects
-                                    const div = document.createElement('div');
-                                    div.classList.add('row');
-
-                                    div.innerHTML = `<div class="form-group col-md-4 required">
-                                        ${productHtml}
-                                  </div>
-
-                                 <div class="form-group col-md-4 price_id ">
-                                    <label for="price[]">Price</label>
-                                    <input type="number" name="price[]" disabled class="form-control price-${rowCounter}" value="" placeholder="Enter price">
-                                    <input type="hidden" class="type-${rowCounter}" value="${order_item.type}" name="type[]">
-                                 </div>
-                                <div class="form-group col-md-4 price_id ">
-                                    <label for="price[]">Quantity</label>
-                                    <input type="number" name="quantity[]" class="form-control quantity-${rowCounter}" value="" placeholder="Enter quantity">
-                                </div>`;
-
-                                    // Append the new row to the 'content' element
-                                    document.getElementById('content').appendChild(div);
-                                    $('.' + priceId).val(priceInteger);
-                                    $('.' + quantityId).val(quantityInteger);
-                                    rowCounter++;
-                                    console.log(div);
-                                }
-                            });
-
-                            $('#store_or_update_form #update_id').val(data.id);
-                            $('#store_or_update_form #shipping_address').val(data.shipping_address);
-                            $('#store_or_update_form #billing_address').val(data.billing_address);
-                            $('#store_or_update_form #shipping_charge').val(data.shipping_charge);
-                            $('#store_or_update_form #payment_method_id').val(data.payment_method_id);
-                            $('#store_or_update_form #payment_details').val(data.payment_details);
-                            $('#store_or_update_form #payment_status_id').val(data.payment_status_id);
-                            $('#store_or_update_form #total').val(data.total);
-                            $('#store_or_update_form #discount').val(data.discount);
-                            $('#store_or_update_form #tax').val(data.tax);
-                            $('#store_or_update_form #grand_total').val(data.grand_total);
-                            $('#store_or_update_form .selectpicker').selectpicker('refresh');
-
-                            $('#store_or_update_modal').modal({
+                            $('#view_modal').modal({
                                 keyboard: false,
                                 backdrop: 'static',
                             });
                             $('#store_or_update_modal .modal-title').html(
-                                '<i class="fas fa-edit"></i> <span>Edit  Order</span>');
-                            $('#store_or_update_modal #save-btn').text('Update');
+                                '<i class="fas fa-edit"></i> <span>View B2B</span>');
+                            // $('#store_or_update_modal #save-btn').text('Update');
 
                         },
                         error: function (xhr, ajaxOption, thrownError) {
@@ -428,7 +358,7 @@
                 let id    = $(this).data('id');
                 let name  = $(this).data('name');
                 let row   = table.row($(this).parent('tr'));
-                let url   = "{{ route('order.delete') }}";
+                let url   = "{{ route('b2b.delete') }}";
                 delete_data(id, url, table, row, name);
             });
 
@@ -447,7 +377,7 @@
                         icon: 'warning',
                     });
                 }else{
-                    let url = "{{route('order.bulk.delete')}}";
+                    let url = "{{route('b2b.bulk.delete')}}";
                     bulk_delete(ids,url,table,rows);
                 }
             }
@@ -457,7 +387,7 @@
                 let payment_status_id = $(this).data('status');
                 let name  = '';
                 let row   = table.row($(this).parent('tr'));
-                let url   = "{{ route('order.change.status') }}";
+                let url   = "{{ route('b2b.change.status') }}";
                 change_payment_status(id,payment_status_id,name,table,url);
             });
 
@@ -485,7 +415,7 @@
 
         });
 
-            function getOrderStatus(order_id,id) {
+            function getStatus(status_id,id) {
                 Swal.fire({
                     title: 'Are you sure to change ' + name + ' status?',
                     icon: 'warning',
@@ -496,9 +426,9 @@
                 }).then((result) => {
                     if (id) {
                         $.ajax({
-                            url: "{{route('order.change.order_status')}}",
+                            url: "{{route('b2b.change.update_status')}}",
                             type: "POST",
-                            data: {id: id, order_id: order_id, _token: _token},
+                            data: {id: id, status_id: status_id, _token: _token},
                             dataType: "JSON",
                             success: function (data) {
                                 Swal.fire("Status Changed", data.message, "success").then(function () {
@@ -517,7 +447,7 @@
             function getPrice(id, type = '', price_id = '') {
                 if (id) {
                     $.ajax({
-                        url: "{{route('order.change.product_price')}}",
+                        url: "{{route('b2b.change.product_price')}}",
                         type: "POST",
                         data: {id: id,type:type, _token: _token},
                         dataType: "JSON",
