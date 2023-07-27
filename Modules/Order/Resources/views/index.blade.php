@@ -329,13 +329,11 @@
                             table.ajax.reload();
                             console.log(data.order_items);
                             rowCounter=0;
-                            console.log(rowCounter);
+
                             data.order_items.map(function (order_item, key) {
                                 const productId = `product-${rowCounter}`;
                                 const priceId = `price-${rowCounter}`;
                                 const quantityId = `quantity-${rowCounter}`;
-
-                                // var productHtml ="<option value='' >Select please</option>";
 
                                 var priceInteger =order_item.unit_price;
                                 var quantityInteger =order_item.quantity;
@@ -345,10 +343,7 @@
                                     data.inventories.map(function(inventory, ke){
 
                                         if(inventory.id == order_item.inventory_id) {
-                                            // productHtml += "<option value='" + inventory.id + "' selected>" + inventory.title + "</option>";
                                             productHtml += "<input type='hidden' name='product_id[]' value='" + inventory.id + "'>" + inventory.title + "";
-                                        }else{
-                                            // productHtml += "<option  value=" + inventory.id + ">" + inventory.title + "</option>";
                                         }
                                     });
                                 }else if(order_item.type=='combo'){
@@ -356,11 +351,7 @@
                                     data.combos.map(function(combo, key){
                                         if(combo.id == order_item.combo_id) {
                                             productHtml += "<input type='hidden' name='product_id[]' value='" + combo.id + "'>" + combo.title + "";
-                                            // productHtml += "<option value='" + combo.id + "' selected>" + combo.title + "</option>";
                                         }
-                                        // else{
-                                        //     productHtml += "<option  value=" + combo.id + ">" + combo.title + "</option>";
-                                        // }
                                     });
                                 }
 
@@ -378,19 +369,16 @@
                                     const div = document.createElement('div');
                                     div.classList.add('row');
 
-                                    div.innerHTML = `<div class="form-group col-md-6 required">
-<!--                                  <label for="product-${rowCounter}">Products</label>-->
-<!--                                  <select name="product_id[]" class="form-control product-${rowCounter}" onchange="getPrice(this.value,$('.type-${rowCounter}').val(),'price-${rowCounter}')" >-->
-<!--                                      </select>-->
+                                    div.innerHTML = `<div class="form-group col-md-4 required">
                                         ${productHtml}
                                   </div>
 
-                                 <div class="form-group col-md-3 price_id ">
+                                 <div class="form-group col-md-4 price_id ">
                                     <label for="price[]">Price</label>
                                     <input type="number" name="price[]" disabled class="form-control price-${rowCounter}" value="" placeholder="Enter price">
                                     <input type="hidden" class="type-${rowCounter}" value="${order_item.type}" name="type[]">
                                  </div>
-                                <div class="form-group col-md-3 price_id ">
+                                <div class="form-group col-md-4 price_id ">
                                     <label for="price[]">Quantity</label>
                                     <input type="number" name="quantity[]" class="form-control quantity-${rowCounter}" value="" placeholder="Enter quantity">
                                 </div>`;

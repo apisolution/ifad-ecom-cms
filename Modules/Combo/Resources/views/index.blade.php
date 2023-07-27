@@ -288,7 +288,7 @@ $(document).ready(function(){
                     }
 
                 });
-                 
+
             } else {
                 notification(data.status, data.message);
                 if (data.status == 'success') {
@@ -302,7 +302,7 @@ $(document).ready(function(){
                      document.getElementById('content').innerHTML = '';
 
                 }
-               
+
             }
 
         },
@@ -344,7 +344,7 @@ $(document).ready(function(){
                                     }
                                 });
 
-                                
+
 
                                 if (rowCounter == 0) {
                                     // Handle the first row differently
@@ -509,14 +509,14 @@ function showStoreFormModal(modal_title, btn_text)
 // $('#store_or_update_form').on('click','.addnew',function(){
 
 //         console.log('clicked')
-    
-//     }); 
+
+//     });
 
  function addRow() {
         const rowId = `row-${rowCounter}`;
         const div = document.createElement('div');
         div.classList.add('row');
-    
+
 
         div.innerHTML = `<div class="form-group col-md-6 required">
                         <select name="inventory_id[]" id="inventory_id-${rowCounter}" class="form-control" data-live-search="true">
@@ -528,16 +528,16 @@ function showStoreFormModal(modal_title, btn_text)
                         </select>
                     </div>
                         <div class="form-group col-md-6">
-                            <input class="mt-5" type="button" value="Remove" onclick="removeRow(this)">
+                            <input class="mt-2" type="button" value="Remove" onclick="removeRow(this)">
                         </div>`;
 
         document.getElementById('content').appendChild(div);
 
         // Initialize the SelectPicker plugin for the newly created select box
-        
+
         $(`#inventory_id-${rowCounter}`).selectpicker();
-        
-        // $(`#variant_id-${rowCounter}`).classList.add('data-live-search=true');	
+
+        // $(`#variant_id-${rowCounter}`).classList.add('data-live-search=true');
         // $(`#variant_id-${rowCounter}`).classList.add('selectpicker');
         //  $('.selectpicker').selectpicker('refresh');
 
@@ -551,13 +551,13 @@ function showStoreFormModal(modal_title, btn_text)
     }
 
     $(document).on('click', '#modal-close-btn', function () {
-       
+
         document.getElementById('content').innerHTML = '';
     });
     //  $(document).on('click', '#save-btn', function () {
-       
+
     //     document.getElementById('content').innerHTML = '';
     // });
-       
+
 </script>
 @endpush

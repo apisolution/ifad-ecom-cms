@@ -77,7 +77,7 @@ class InventoryController extends BaseController
                     }else{
                         $row[] = $value->title;
                     }
-                    
+
                     $row[] = $value->sale_price;
                     $row[] = $value->stock_quantity;
                     $row[] = permission('inventory-edit') ? change_status($value->id, $value->status, $value->title) : STATUS_LABEL[$value->status];
@@ -151,7 +151,7 @@ class InventoryController extends BaseController
 
     public static function getUniqueId(Inventory $model) {
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $length = 9;
+        $length = 6;
         $id = '';
         for ($i = 0; $i < $length; $i++) {
             $id .= $characters[random_int(0, strlen($characters) - 1)];

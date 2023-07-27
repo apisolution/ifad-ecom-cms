@@ -68,7 +68,7 @@ class ComboController extends BaseController
                     if (permission('combo-bulk-delete')) {
                         $row[] = table_checkbox($value->id);
                     }
-                  
+
                     $row[] = $no;
                     if($value->stock_quantity <= $value->reorder_quantity){
                         $row[] = '<span class="text-danger">'.$value->title.'</span>';
@@ -78,7 +78,7 @@ class ComboController extends BaseController
                     $row[] = $value->sku;
                     $row[] = $value->sale_price;
                     $row[] = $value->offer_price;
-                  
+
                     $row[] = permission('combo-edit') ? change_status($value->id, $value->status, $value->title) : STATUS_LABEL[$value->status];
 
                     $row[] = action_button($action);
@@ -101,6 +101,10 @@ class ComboController extends BaseController
                 $collection = collect($request->validated())->except(['combo_category_id']);
                 $collection = $this->track_data($request->update_id, $collection);
                 $combo_category_id = $request->combo_category_id;
+                if($request->update_id==''){
+                    $sku = self::getUniqueId($this->model);
+                    $collection = $collection->merge(compact('sku'));
+                }
                 $collection = $collection->merge(compact('combo_category_id'));
                 $result = $this->model->updateOrCreate(['id' => $request->update_id], $collection->all());
                 //$output = $this->store_message($result, $request->update_id);
@@ -128,7 +132,18 @@ class ComboController extends BaseController
             return response()->json($this->access_blocked());
         }
     }
-
+    public static function getUniqueId(Combo $model) {
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $length = 6;
+        $id = '';
+        for ($i = 0; $i < $length; $i++) {
+            $id .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+        if ($model->where('sku', $id)->exists()) {
+            return self::getUniqueId($model);
+        }
+        return $id;
+    }
 
     public function edit(Request $request)
     {
