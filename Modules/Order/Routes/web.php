@@ -21,5 +21,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('bulk-delete', 'OrderController@bulk_delete')->name('bulk.delete');
         Route::post('change-payment-status', 'OrderController@change_payment_status')->name('change.status');
         Route::post('change-order-status', 'OrderController@change_order_status')->name('change.order_status');
+        Route::post('get-product-price', 'OrderController@get_price')->name('change.product_price');
     });
 });

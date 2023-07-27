@@ -327,7 +327,6 @@
                         dataType: "JSON",
                         success: function (data) {
                             console.log(data);
-                            // return false;
                             data.inventory_variants.map(function (val, key) {
                                 const rowId = `row-${rowCounter}`;
 
