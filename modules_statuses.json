@@ -44,5 +44,6 @@
     "ComboImage": true,
     "InventoryImage": true,
     "Review": true,
-    "Customers": true
+    "Customers": true,
+    "B2B": true
 }
