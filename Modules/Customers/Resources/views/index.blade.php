@@ -69,7 +69,7 @@
                                     </div>
                                 </th>
                                 @endif
-				<th>Type Id</th>
+				                <th>Type Id</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Address</th>

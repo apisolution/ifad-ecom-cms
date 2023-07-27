@@ -11,6 +11,10 @@
 |
 */
 
-Route::prefix('review')->group(function() {
-    Route::get('/', 'ReviewController@index');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('review', 'ReviewController@index')->name('review');
+    Route::group(['prefix' => 'review', 'as'=>'review.'], function () {
+        Route::post('datatable-data', 'ReviewController@get_datatable_data')->name('datatable.data');
+        Route::post('change-status', 'ReviewController@change_status')->name('change.status');
+    });
 });
