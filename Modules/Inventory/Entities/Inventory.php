@@ -16,7 +16,7 @@ class Inventory extends BaseModel
 
     protected $fillable = ['product_id','title','sku','sale_price','offer_price',
         'offer_start','offer_end','stock_quantity','reorder_quantity','is_special_deal',
-        'is_manage_stock','min_order_quantity','status','created_at','updated_at'];
+        'is_manage_stock','min_order_quantity','image','status','created_at','updated_at'];
 
     public function product()
     {
@@ -29,10 +29,15 @@ class Inventory extends BaseModel
     }
 
     protected $name;
+    protected $category_id;
 
     public function setName($name)
     {
         $this->name = $name;
+    }
+    public function setCategory($category_id)
+    {
+        $this->category_id = $category_id;
     }
 
     private function get_datatable_query()
@@ -44,7 +49,11 @@ class Inventory extends BaseModel
         }
 
 //      $query = self::toBase();
-        $query = self::with('product');
+        $query = self::with('product')->whereHas('product', function ($query) {
+            if (!empty($this->category_id)) {
+                $query->where('category_id', $this->category_id);
+            }
+        });
 
         /*****************
          * *Search Data **

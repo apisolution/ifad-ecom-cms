@@ -48,11 +48,18 @@
 
                         <form id="form-filter">
                             <div class="row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <label for="name">inventory Name</label>
                                     <input type="text" class="form-control" name="name" id="name" placeholder="Enter Inventory Product">
                                 </div>
-                                <div class="form-group col-md-8 pt-24">
+                                <x-form.selectbox labelName="Category" name="category_id" col="col-md-3" class="selectpicker">
+                                    @if (!$categories->isEmpty())
+                                        @foreach ($categories as $catgory)
+                                            <option value="{{ $catgory->id }}">{{ $catgory->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </x-form.selectbox>
+                                <div class="form-group col-md-6 pt-24">
                                     <button type="button" class="btn btn-danger btn-sm float-right" id="btn-reset"
                                             data-toggle="tooltip" data-placement="top" data-original-title="Reset Data">
                                         <i class="fas fa-redo-alt"></i>

@@ -19,7 +19,7 @@ class Product extends BaseModel
      'product_long_desc', 'status','product_order', 'created_by', 'updated_by'];
 
     public function inventory(){
-        return $this->hasOne(Inventory::class,'id','product_id');
+        return $this->hasMany(Inventory::class,'id','product_id');
     }
     public function category()
     {
