@@ -44,6 +44,15 @@
 
                     <x-form.textbox type="number" labelName="Reorder Quantity" name="reorder_quantity" placeholder="Enter Reorder Quantity" col="col-md-3" />
 
+                    <div class="form-group col-md-6">
+                        <label for="image">Inventory Image</label>
+                        <div class="col-md-12 px-0 text-center">
+                            <div id="image">
+
+                            </div>
+                        </div>
+                        <input type="hidden" name="old_image" id="old_image">
+                    </div>
 
                     <div class="form-group col-md-3">
                         <label for="title">Is Special Deal</label>
@@ -60,7 +69,7 @@
                             <label class="form-check-label" for="is_manage_stock">Yes</label>
                         </li>
                     </div>
-                    <div class="form-group col-md-6"></div>
+
 {{--                <x-form.selectbox onchange="getVariantOptionList(this.value,'row-0')" labelName="Variants" name="variant_id[]" required="required" col="col-md-3" class="selectpicker main-0">--}}
 {{--                    @foreach ($variants as $variant)--}}
 {{--                       <option value="{{ $variant->id }}">{{ $variant->name }}</option>--}}

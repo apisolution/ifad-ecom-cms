@@ -79,6 +79,7 @@
                                 <th>Title</th>
                                 <th>Sale Price</th>
                                 <th>Stock Quantity</th>
+                                <th>Image</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -327,6 +328,21 @@
                         dataType: "JSON",
                         success: function (data) {
                             console.log(data);
+
+                            $('#store_or_update_form #old_image').val(data.image);
+                            if(data.image){
+                                var image = "{{ asset('storage/'.INVENTORY_SINGLE_IMAGE_PATH)}}/"+data.image;
+                                $('#store_or_update_form #image img.spartan_image_placeholder').css('display','none');
+                                $('#store_or_update_form #image .spartan_remove_row').css('display','none');
+                                $('#store_or_update_form #image .img_').css('display','block');
+                                $('#store_or_update_form #image .img_').attr('src',image);
+                            }else{
+                                $('#store_or_update_form #image img.spartan_image_placeholder').css('display','block');
+                                $('#store_or_update_form #image .spartan_remove_row').css('display','none');
+                                $('#store_or_update_form #image .img_').css('display','none');
+                                $('#store_or_update_form #image .img_').attr('src','');
+                            }
+
                             data.inventory_variants.map(function (val, key) {
                                 const rowId = `row-${rowCounter}`;
 
@@ -354,8 +370,12 @@
 
                                 if (rowCounter == 0) {
                                     // Handle the first row differently
+                                    var options = `<select name="variant_option_id[]" id="variant_option_id" class="form-control row-0">
+                                        ${variantOptionHtml}
+                                    </select>`;
                                     $('.main-0').val(val.variant_id);
-                                    $('.row-0').html(variantOptionHtml);
+                                    // $('.row-0').html(variantOptionHtml);
+                                    $('.row-0').html(options);
                                     $('.row-0').val(val.variant_option_id);
                                     // $('.' + rowId).val(val.variant_option_id);
                                     rowCounter++;
@@ -363,7 +383,7 @@
                                     // Create new row with variant and variant_option selects
                                     const div = document.createElement('div');
                                     div.classList.add('row');
-                                    
+
                                     div.innerHTML = `<div class="form-group col-md-3 required">
                                   <label for="variant_id[]">Variants</label>
                                   <select name="variant_id[]" id="variant_id[]" class="form-control main-${rowCounter}" onchange="getVariantOptionList(this.value, 'row-${rowCounter}')" >
@@ -478,7 +498,7 @@
             $('input[name="image"]').prop('required',true);
 
             $('.remove-files').on('click', function(){
-                $(this).parents('.col-md-12').remove();
+                $(this).parents('.col-md-6').remove();
             });
 
         });
@@ -504,7 +524,8 @@
         }
 
         $('#image').spartanMultiImagePicker({
-            fieldName: 'fileUpload[]',
+            fieldName: 'image',
+            maxCount: 1,
             rowHeight: '200px',
             groupClassName: 'col-md-12 com-sm-12 com-xs-12',
             maxFileSize: '',
@@ -539,7 +560,7 @@
                         }
                     });
                     $(loadedContentDiv).html(opt);
-                  
+
                     console.log(loadedContentDiv);
                     // $('#store_or_update_form #variant_option_id').selectpicker();
                     // $(`#inventory_id-${rowCounter}`).selectpicker();
@@ -582,14 +603,13 @@
                             </div>`; // Closing </div> added here
                             document.getElementById('content').appendChild(div);
                              $(`.main-${rowCounter}`).selectpicker();
-                            
-                    
+
+
                             rowCounter++;
                         }
-                        function removeRow(input) {
-                            input.parentNode.parentNode.remove();
-                        }
-
+            function removeRow(input) {
+                input.parentNode.parentNode.remove();
+            }
 
     </script>
 @endpush

@@ -41,16 +41,16 @@ class CustomersController extends BaseController
                     $no++;
                     $action = '';
 
+                    if(permission('customer-view')){
+                        $action .= ' <a class="dropdown-item view_data" data-id="' . $value->id . '"><i class="fas fa-eye text-primary"></i> View</a>';
+                    }
                     if(permission('customer-edit')){
                         $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '"><i class="fas fa-edit text-primary"></i> Edit</a>';
                     }
 
-                        $action .= ' <a class="dropdown-item view_data" data-id="' . $value->id . '"><i class="fas fa-eye text-primary"></i> View</a>';
-
                     if(permission('customer-delete')){
                         $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->name . '"><i class="fas fa-trash text-danger"></i> Delete</a>';
                     }
-
 
                     $row = [];
 

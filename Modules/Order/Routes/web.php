@@ -17,6 +17,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('datatable-data', 'OrderController@get_datatable_data')->name('datatable.data');
         Route::post('store-or-update', 'OrderController@store_or_update_data')->name('store.or.update');
         Route::post('edit', 'OrderController@edit')->name('edit');
+        Route::post('view', 'OrderController@view')->name('view');
+        Route::get('invoice-print-pdf', 'OrderController@invoice_print_pdf')->name('invoice_print_pdf');
         Route::post('delete', 'OrderController@delete')->name('delete');
         Route::post('bulk-delete', 'OrderController@bulk_delete')->name('bulk.delete');
         Route::post('change-payment-status', 'OrderController@change_payment_status')->name('change.status');

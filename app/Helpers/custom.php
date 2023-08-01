@@ -9,6 +9,7 @@ define('EMPLOYEE_IMAGE_PATH', 'employee/');
 define('BRAND_IMAGE_PATH', 'brand/');
 define('CONTENT_CATEGORY_IMAGE_PATH', 'content-category/');
 define('ComboCategory_IMAGE_PATH', 'combo-category/');
+define('INVENTORY_SINGLE_IMAGE_PATH', 'inventory-image/');
 define('PaymentMethod_IMAGE_PATH', 'payment-method/');
 define('CONTENT_MODULE_IMAGE_PATH', 'content-module/');
 define('CITEM_IMAGE_PATH', 'content-item/');

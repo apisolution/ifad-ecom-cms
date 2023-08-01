@@ -102,6 +102,7 @@
 
     </div>
     @include('order::modal')
+    @include('order::view_modal')
 @endsection
 
 @push('script')
@@ -311,6 +312,99 @@
                 });
             });
 
+            $(document).on('click', '.view_data', function () {
+                let id = $(this).data('id');
+                rowCounter = 0;
+                if (id) {
+                    $.ajax({
+                        url: "{{route('order.view')}}",
+                        type: "POST",
+                        data: {id: id, _token: _token},
+                        dataType: "JSON",
+                        success: function (data) {
+                            console.log(data);
+                            console.log(data.customer.phone_number);
+                            $('.billing').html(data.billing_address);
+                            $('.shipping').html(data.shipping_address+', '+data.customer.phone_number);
+                            $('.order_id').html('# '+data.id);
+
+                            function formatDateToDMY(date) {
+                                const options = { day: 'numeric', month: 'numeric', year: 'numeric' };
+                                return new Date(date).toLocaleDateString(undefined, options);
+                            }
+                            // $('.logo').attr("src","https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png");
+                            if(data.logo[6].value){
+                                var base = '{{ url('/') }}';
+                                $('.logo').attr("src",base+'/storage/logo/'+data.logo[6].value);
+                            }
+
+                            // console.log(data.logo[6].value);
+                            if(data.order_date){
+                                var inputDate = data.order_date;
+                                const formattedDate = formatDateToDMY(inputDate);
+                                $('.order_date').html(formattedDate);
+                            }
+
+
+                            //order items loop
+                            var tr ='';
+                            var sl =1;
+                            var totalPrice =0;
+                            data.order_items.map(function(order_item,key){
+                                if(order_item.type=='combo'){
+                                    // console.log(order_item.combo);
+                                    tr+="<tr> <th scope='row'>"+sl+"</th>"+
+                                        "<td>"+order_item.combo.title+"</td>"+
+                                        "<td>"+order_item.quantity+"</td>"+
+                                        "<td>BDT "+order_item.unit_price+"</td>"+
+                                        "<td>BDT "+order_item.quantity*order_item.unit_price+"</td>"+
+                                        "</tr>";
+                                    totalPrice = order_item.quantity*order_item.unit_price;
+                                }
+                                else if(order_item.type=='product'){
+                                    tr += "<tr> <th scope='row'>" + sl + "</th>" +
+                                        "<td>" + order_item.inventory.title + "</td>" +
+                                        "<td>" + order_item.quantity + "</td>" +
+                                        "<td>BDT " + order_item.unit_price + "</td>" +
+                                        "<td>BDT " + order_item.quantity * order_item.unit_price + "</td>" +
+                                        "</tr>";
+                                    totalPrice +=order_item.quantity * order_item.unit_price;
+                                }
+
+                            console.log(tr);
+
+                            });
+                            //grand total
+                            tr+="<tr>"+
+                                "<td colspan='3'></td>"+
+                                    "<td><span class='text-right bold'>Grand Total</span></td>"+
+                                    "<td><span class='text-right bold'>BDT "+data.total+"</span></td>"+
+                                "</tr>"+
+
+                                " <tr>"+
+                                    "<td class='bold' colspan='5'><hr></td>"+
+                                "</tr>";
+
+                            tr+="<tr>"+
+                                "<td class='bold' colspan='2'><span class='bold'>Authorize</span></td>"+
+                            "<td class='bold text-right' colspan='3'><span class='text-right bold'>Admin</span></td>"+
+                            "</tr>";
+
+                            $('#table_tr').html(tr);
+
+                            //view_modal
+                            $('#view_modal').modal({
+                                keyboard: false,
+                                backdrop: 'static',
+                            });
+                        },
+                        error:function(xhr, ajaxOption, thrownError){
+                            console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+                        }
+                    })
+                }
+            });
+
             $(document).on('click', '.edit_data', function () {
                 let id = $(this).data('id');
                 var productHtml='';
@@ -329,7 +423,7 @@
                             table.ajax.reload();
                             console.log(data.order_items);
                             rowCounter=0;
-
+                            console.log(rowCounter);
                             data.order_items.map(function (order_item, key) {
                                 const productId = `product-${rowCounter}`;
                                 const priceId = `price-${rowCounter}`;

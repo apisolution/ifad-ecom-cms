@@ -27,6 +27,7 @@ class CreateInventoriesTable extends Migration
             $table->enum('is_special_deal', ['1', '2'])->nullable();
             $table->enum('is_manage_stock', ['1', '2'])->nullable();
             $table->integer('min_order_quantity')->nullable();
+            $table->string('image')->nullable();
             $table->enum('status', ['1', '2'])->nullable()->default('1')->comment("1=Active, 2=Inactive");
             $table->timestamps();
         });

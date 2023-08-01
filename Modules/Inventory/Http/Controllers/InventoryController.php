@@ -78,10 +78,18 @@ class InventoryController extends BaseController
                         $row[] = $value->title;
                     }
 
+                    if(isset($value->image) && !empty($value->image)){
+                        $img = table_image($value->image,INVENTORY_SINGLE_IMAGE_PATH,$value->title);
+                    }else if(isset($value->product->image) && !empty($value->product->image)){
+                        $img = table_image($value->product->image,INVENTORY_SINGLE_IMAGE_PATH,$value->title);
+                    }else{
+                        $img = '';
+                    }
+
                     $row[] = $value->sale_price;
                     $row[] = $value->stock_quantity;
+                    $row[] = $img;
                     $row[] = permission('inventory-edit') ? change_status($value->id, $value->status, $value->title) : STATUS_LABEL[$value->status];
-
                     $row[] = action_button($action);
                     $data[] = $row;
                 }
@@ -102,6 +110,16 @@ class InventoryController extends BaseController
             if (permission('inventory-add') || permission('inventory-edit')) {
                 $collection = collect($request->validated())->except(['fileUpload', 'product_id']);
                 $collection = $this->track_data($request->update_id, $collection);
+                $image = $request->old_image;
+                if($request->hasFile('image')){
+                    $image = $this->upload_file($request->file('image'),INVENTORY_SINGLE_IMAGE_PATH);
+
+                    if(!empty($request->old_image)){
+                        $this->delete_file($request->old_image,INVENTORY_SINGLE_IMAGE_PATH);
+                    }
+                }
+                $collection = $collection->merge(compact('image'));
+
                 $product_id = $request->product_id;
                 if($request->update_id==''){
                     $sku = self::getUniqueId($this->model);

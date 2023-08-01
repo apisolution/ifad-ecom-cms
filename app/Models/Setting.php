@@ -12,6 +12,7 @@ class Setting extends Model
      *
      * @var array
      */
+    protected $table = 'settings';
     protected $fillable = ['name','value'];
 
     public static function get($name){
