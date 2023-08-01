@@ -148,11 +148,9 @@ class OrderController extends BaseController
         }
     }
 
-    public function invoice_print_pdf(){
-        $data = [
-            'title' => 'Welcome',
-            'date' => date('m/d/Y')
-        ];
+    public function invoice_print_pdf($id=null){
+        $data['order'] = Order::with('orderItems', 'customer')->find(1);
+        return view('order::invoice_print', $data);
 
         $pdf = PDF::loadView('order::invoice_print', $data);
 //        $pdf = PDF::loadHTML('order::invoice_print', $data);

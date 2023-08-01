@@ -16,16 +16,14 @@ class InventoryFormRequest extends FormRequest
         $rules = [];
         $rules['product_id'] = ['required'];
         $rules['title'] = ['required'];
-
-        if(request()->update_id){
-            $rules['sku'][2] = 'unique:inventories,sku,' . request()->update_id;
-        }
+        $rules['sale_price']  = ['nullable'];
+//        if(request()->update_id){
+//            $rules['sku'][2] = 'unique:inventories,sku,' . request()->update_id;
+//        }
 //        else{
 //            $rules['sku'] = ['required','unique:inventories,sku'];
 //        }
-        $rules['image']  = ['nullable','image','mimes:png,jpg'];
-
-        $rules['sale_price']  = ['nullable'];
+        $rules['image']  = ['nullable','image','mimes:png,jpg,jpeg'];
         $rules['offer_price']  = ['nullable'];
         $rules['offer_start']  = ['nullable'];
         $rules['offer_end']  = ['nullable'];

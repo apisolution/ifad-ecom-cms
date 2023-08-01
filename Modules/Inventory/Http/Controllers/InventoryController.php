@@ -5,6 +5,7 @@ namespace Modules\Inventory\Http\Controllers;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Modules\Base\Http\Controllers\BaseController;
+use Modules\Category\Entities\Category;
 use Modules\Inventory\Entities\InventoryVariant;
 use Modules\Product\Entities\Product;
 use Modules\Inventory\Entities\Inventory;
@@ -31,7 +32,8 @@ class InventoryController extends BaseController
             $data = [
                 'products' => Product::all(),
                 'variants' => Variant::get(),
-                 'variant_options' => VariantOption::get()
+                 'variant_options' => VariantOption::get(),
+                'categories'=>Category::get()
             ];
             return view('inventory::index', $data);
         } else {
@@ -113,11 +115,11 @@ class InventoryController extends BaseController
                 $image = $request->old_image;
                 if($request->hasFile('image')){
                     $image = $this->upload_file($request->file('image'),INVENTORY_SINGLE_IMAGE_PATH);
-
                     if(!empty($request->old_image)){
                         $this->delete_file($request->old_image,INVENTORY_SINGLE_IMAGE_PATH);
                     }
                 }
+
                 $collection = $collection->merge(compact('image'));
 
                 $product_id = $request->product_id;
@@ -128,7 +130,6 @@ class InventoryController extends BaseController
                     $collection = $collection->merge(compact('product_id'));
                 }
                 $result = $this->model->updateOrCreate(['id' => $request->update_id], $collection->all());
-
                 //inventory variant option save start
                 $inventory['inventory_id'] = $result->id??0;
                 $inventory_variant_option = collect($inventory);
