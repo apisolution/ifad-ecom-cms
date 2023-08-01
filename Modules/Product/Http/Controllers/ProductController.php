@@ -79,7 +79,7 @@ class ProductController extends BaseController
                     $row[] = table_image($value->image,PRODUCT_IMAGE_PATH,$value->name);
                     $row[] = table_image($value->lifestyle_image,PRODUCT_IMAGE_PATH,$value->name);
                     $row[] = $value->name;
-                    $row[] = $value->category->name;
+                    $row[] = $value->category->name??'';
 		    $row[] = $value->product_brochure;
                     $row[] = permission('product-edit') ? change_status($value->id,$value->status,$value->name) : STATUS_LABEL[$value->status];
                     $row[] = action_button($action);
