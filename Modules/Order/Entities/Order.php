@@ -5,6 +5,7 @@ namespace Modules\Order\Entities;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Customer\Entities\Customer;
+use Modules\Customers\Entities\Customers;
 use Modules\PaymentMethod\Entities\PaymentMethod;
 use Modules\Base\Entities\BaseModel;
 
@@ -88,7 +89,7 @@ class Order extends BaseModel
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+        return $this->belongsTo(Customers::class, 'customer_id', 'id');
     }
 
     /**

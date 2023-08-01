@@ -5,6 +5,7 @@ namespace Modules\Inventory\Entities;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Base\Entities\BaseModel;
+use Modules\Product\Entities\Product;
 
 
 class Inventory extends BaseModel
@@ -16,6 +17,11 @@ class Inventory extends BaseModel
     protected $fillable = ['product_id','title','sku','sale_price','offer_price',
         'offer_start','offer_end','stock_quantity','reorder_quantity','is_special_deal',
         'is_manage_stock','min_order_quantity','status','created_at','updated_at'];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class,'product_id','id');
+    }
 
     public function reviews()
     {
@@ -37,7 +43,8 @@ class Inventory extends BaseModel
             $this->column_order = ['title','sale_price','stock_quantity','status',null];
         }
 
-        $query = self::toBase();
+//      $query = self::toBase();
+        $query = self::with('product');
 
         /*****************
          * *Search Data **

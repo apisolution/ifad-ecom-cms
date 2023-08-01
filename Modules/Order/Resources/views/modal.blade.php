@@ -51,10 +51,12 @@
                 </div>
 
                 {{--order item edit--}}
+
                 <div class="row">
                 <div class="form-group col-md-4 required">
                     <label class="mb-3" for="product-0">Product</label>
                     <div class="product-0"></div>
+                    <input type="hidden" class="type-0" name="type[]">
 {{--                    <select name="product_id[]" id="product-0" class="form-control product-0" onchange="getPrice(this.value,$('.type-0').val(),'price-0')" >--}}
 {{--                    </select>--}}
                 </div>

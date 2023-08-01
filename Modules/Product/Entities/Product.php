@@ -4,6 +4,7 @@ namespace Modules\Product\Entities;
 
 use Modules\Base\Entities\BaseModel;
 use Modules\Category\Entities\Category;
+use Modules\Inventory\Entities\Inventory;
 use Modules\PackType\Entities\PackType;
 use Modules\ProductImage\Entities\ProductImage;
 use Modules\Segment\Entities\Segment;
@@ -17,7 +18,9 @@ class Product extends BaseModel
     protected $fillable = ['name', 'image','lifestyle_image','product_brochure','category_id', 'sub_category_id', 'variant_id', 'variant_option_id', 'segment_id', 'pack_id','product_link', 'product_bncn', 'product_video_path', 'product_short_desc',
      'product_long_desc', 'status','product_order', 'created_by', 'updated_by'];
 
-
+    public function inventory(){
+        return $this->hasOne(Inventory::class,'id','product_id');
+    }
     public function category()
     {
         return $this->belongsTo(Category::class,'category_id','id');

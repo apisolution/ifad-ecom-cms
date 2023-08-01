@@ -2,6 +2,7 @@
 
 namespace Modules\Order\Http\Controllers;
 use App\Mail\OrderStatusChanged;
+use App\Models\Setting;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Modules\Base\Http\Controllers\BaseController;
@@ -12,9 +13,10 @@ use Modules\Customers\Entities\Customers;
 use Modules\Order\Entities\OrderItem;
 use Modules\Order\Http\Requests\OrderFormRequest;
 use Illuminate\Support\Facades\Mail;
-use DB;
 use Modules\PaymentMethod\Entities\PaymentMethod;
 use Modules\Product\Entities\Product;
+use DB;
+use PDF;
 
 class OrderController extends BaseController
 {
@@ -55,7 +57,9 @@ class OrderController extends BaseController
                     $no++;
                     $action = '';
 
-                    if (permission('order-edit')) {
+                    if (permission('order-view')) {
+                        $action .= ' <a class="dropdown-item view_data" data-id="' . $value->id . '"><i class="fas fa-eye text-primary"></i> View</a>';
+                    }if (permission('order-edit')) {
                         $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '"><i class="fas fa-edit text-primary"></i> Edit</a>';
                     }
                     if (permission('order-delete')) {
@@ -124,6 +128,39 @@ class OrderController extends BaseController
         }
     }
 
+
+    public function view(Request $request)
+    {
+        if ($request->ajax()) {
+            if (permission('order-view')) {
+                $data = $this->model->findOrFail($request->id);
+                $data->load('orderItems','customer');
+                $data['inventories'] = Inventory::get();
+                $data['combos'] = Combo::get();
+                $data['logo'] = Setting::all();
+                $output = $this->data_message($data);
+            } else {
+                $output = $this->access_blocked();
+            }
+            return response()->json($output);
+        } else {
+            return response()->json($this->access_blocked());
+        }
+    }
+
+    public function invoice_print_pdf(){
+        $data = [
+            'title' => 'Welcome',
+            'date' => date('m/d/Y')
+        ];
+
+        $pdf = PDF::loadView('order::invoice_print', $data);
+//        $pdf = PDF::loadHTML('order::invoice_print', $data);
+        return $pdf->stream();
+
+//        return $pdf;
+//        return $pdf->download('invoice.pdf');
+    }
 
     public function edit(Request $request)
     {
